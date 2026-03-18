@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "./config";
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
@@ -53,7 +54,7 @@ useEffect(() => {
       try {
         // --- 1. FETCH TRIPS ---
         console.log("Fetching real bookings from Java...");
-        const tripRes = await fetch("http://localhost:8080/api/bookings/all"); 
+        const tripRes = await fetch(`${API_BASE_URL}/bookings/all`);
         if (tripRes.ok) {
           const javaData = await tripRes.json();
           const realTrips: Trip[] = javaData.map((jTrip: any) => ({
@@ -75,7 +76,7 @@ useEffect(() => {
 
         // --- 2. FETCH REVIEWS (NEW!) ---
         console.log("Fetching real reviews from Java...");
-        const reviewRes = await fetch("http://localhost:8080/api/reviews/all");
+        const reviewRes = await fetch(`${API_BASE_URL}/reviews/all`);
         if (reviewRes.ok) {
           const javaReviews = await reviewRes.json();
           setReviews(javaReviews);
@@ -91,7 +92,7 @@ useEffect(() => {
 
 // --- 3. FETCH ALL USERS (NEW!) ---
         console.log("Fetching real users from Java...");
-        const userRes = await fetch("http://localhost:8080/api/users/all");
+        const userRes = await fetch(`${API_BASE_URL}/users/all`);
         if (userRes.ok) {
           const allUsers = await userRes.json();
           
@@ -115,7 +116,7 @@ useEffect(() => {
   // --- REAL JAVA REGISTRATION ---
   async function register(userData: any): Promise<boolean> {
     try {
-      const response = await fetch("http://localhost:8080/api/users/register", {
+      const response = await fetch(`${API_BASE_URL}/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
@@ -131,7 +132,7 @@ useEffect(() => {
     console.log(`Attempting real login for ${email} as ${role}...`);
 
     try {
-      const response = await fetch("http://localhost:8080/api/users/login", {
+      const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role }),
@@ -167,7 +168,7 @@ async function addTrip(trip: Trip) {
     console.log("Sending new ride to Spring Boot...");
 
     // 1. Send the data to your Java backend
-    const response = await fetch("http://localhost:8080/api/bookings/request", {
+    const response = await fetch(`${API_BASE_URL}/bookings/request`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -200,7 +201,7 @@ async function updateTripStatus(tripId: string, status: TripStatus) {
     if (status === "COMPLETED") {
       try {
         console.log(`Telling Java to complete trip ${tripId}...`);
-        await fetch(`http://localhost:8080/api/bookings/complete/${tripId}?driverId=${currentUser?.id}`, {
+        await fetch(`${API_BASE_URL}/bookings/complete/${tripId}?driverId=${currentUser?.id}`, {
           method: "PUT",
         });
       } catch (error) {
@@ -214,7 +215,7 @@ async function assignDriver(tripId: string, driverId: string) {
     
     // 1. Send the update to your Java backend
     // Note: We use the backticks ` ` to inject the variables straight into the URL
-    const response = await fetch(`http://localhost:8080/api/bookings/assign/${tripId}?driverId=${driverId}`, {
+    const response = await fetch(`${API_BASE_URL}/bookings/assign/${tripId}?driverId=${driverId}`, {
       method: "PUT" // PUT is the standard for "Updating" existing data
     });
 
@@ -258,7 +259,7 @@ async function toggleDriverAvailability(driverId: string) {
     // 3. Tell Java to save this change to users.txt
     try {
       console.log(`Toggling Driver ${driverId} to ${newStatus ? "Online" : "Offline"}...`);
-      await fetch(`http://localhost:8080/api/users/availability/${driverId}?status=${newStatus}`, {
+      await fetch(`${API_BASE_URL}/users/availability/${driverId}?status=${newStatus}`, {
         method: "PUT",
       });
     } catch (error) {
@@ -273,7 +274,7 @@ async function addReview(review: Review) {
     // 2. Send the full review (with comments) to Java
     try {
       console.log("Sending full review to Java...", review);
-      await fetch("http://localhost:8080/api/reviews/add-full", {
+      await fetch(`${API_BASE_URL}/reviews/add-full`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(review)
@@ -291,7 +292,7 @@ async function addReview(review: Review) {
     // 2. Send the rating to the new Java endpoint
     try {
       console.log(`Sending ${rating} star rating for trip ${tripId} to Java...`);
-      await fetch(`http://localhost:8080/api/reviews/add?tripId=${tripId}&rating=${rating}`, {
+      await fetch(`${API_BASE_URL}/reviews/add?tripId=${tripId}&rating=${rating}`, {
         method: "POST",
       });
     } catch (error) {
@@ -310,12 +311,12 @@ async function addReview(review: Review) {
 
   async function deleteCustomer(id: string) {
     setCustomers((prev) => prev.filter((u) => u.id !== id)); // Update UI
-    await fetch(`http://localhost:8080/api/users/${id}`, { method: "DELETE" }); // Update Java
+    await fetch(`${API_BASE_URL}/users/${id}`, { method: "DELETE" }); // Update Java
   }
 
   async function deleteDriver(id: string) {
     setDrivers((prev) => prev.filter((d) => d.id !== id)); // Update UI
-    await fetch(`http://localhost:8080/api/users/${id}`, { method: "DELETE" }); // Update Java
+    await fetch(`${API_BASE_URL}/users/${id}`, { method: "DELETE" }); // Update Java
   }
 
 
