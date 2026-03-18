@@ -77,7 +77,7 @@ const VEHICLE_TYPES: {
   },
 ];
 
-// ── Places Autocomplete Input ──────────────────────────────────────────────────
+// ── Interfaces ────────────────────────────────────────────────────────────────
 interface PlacesInputProps {
   value: string;
   onChange: (val: string) => void;
@@ -86,28 +86,53 @@ interface PlacesInputProps {
   dotColor: "blue" | "gold";
 }
 
+interface RouteRendererProps {
+  origin: google.maps.LatLngLiteral | null;
+  destination: google.maps.LatLngLiteral | null;
+  onDistanceKm: (km: number) => void;
+}
+
+// ── Places Autocomplete Input (STABILIZED) ──────────────────────────────────
 function PlacesInput({ value, onChange, onPlaceSelect, placeholder, dotColor }: PlacesInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const placesLib = useMapsLibrary("places");
 
+  // Keep refs of callbacks to prevent re-initializing Autocomplete when state changes
+  const onPlaceSelectRef = useRef(onPlaceSelect);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onPlaceSelectRef.current = onPlaceSelect;
+    onChangeRef.current = onChange;
+  }, [onPlaceSelect, onChange]);
+
   useEffect(() => {
     if (!placesLib || !inputRef.current) return;
-    autocompleteRef.current = new placesLib.Autocomplete(inputRef.current, {
+
+    const options = {
       fields: ["geometry", "formatted_address", "name"],
       componentRestrictions: { country: "lk" },
-    });
-    autocompleteRef.current.addListener("place_changed", () => {
+    };
+
+    // Initialize Autocomplete once
+    autocompleteRef.current = new placesLib.Autocomplete(inputRef.current, options);
+
+    const listener = autocompleteRef.current.addListener("place_changed", () => {
       const place = autocompleteRef.current!.getPlace();
       if (place?.geometry?.location) {
-        onChange(place.formatted_address || place.name || "");
-        onPlaceSelect(place);
+        const address = place.formatted_address || place.name || "";
+        onChangeRef.current(address);
+        onPlaceSelectRef.current(place);
       }
     });
+
     return () => {
-      google.maps.event.clearInstanceListeners(autocompleteRef.current!);
+      if (autocompleteRef.current) {
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
     };
-  }, [placesLib, onChange, onPlaceSelect]);
+  }, [placesLib]);
 
   return (
     <div className="relative">
@@ -120,8 +145,7 @@ function PlacesInput({ value, onChange, onPlaceSelect, placeholder, dotColor }: 
       </div>
       <input
         ref={inputRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        defaultValue={value}
         placeholder={placeholder}
         autoComplete="off"
         className="w-full pl-9 pr-4 py-3 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
@@ -130,54 +154,57 @@ function PlacesInput({ value, onChange, onPlaceSelect, placeholder, dotColor }: 
   );
 }
 
-// ── Route renderer (Directions API) ───────────────────────────────────────────
-interface RouteRendererProps {
-  origin: google.maps.LatLngLiteral | null;
-  destination: google.maps.LatLngLiteral | null;
-  onDistanceKm: (km: number) => void;
-}
-
+// ── Route renderer (REINFORCED AGAINST BLACK BOX) ───────────────────────────
 function RouteRenderer({ origin, destination, onDistanceKm }: RouteRendererProps) {
   const map = useMap();
   const routesLib = useMapsLibrary("routes");
   const rendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
 
-  const computeRoute = useCallback(async () => {
-    if (!routesLib || !map || !origin || !destination) return;
+  useEffect(() => {
+    if (!routesLib || !map) return;
 
     if (!rendererRef.current) {
       rendererRef.current = new routesLib.DirectionsRenderer({
         suppressMarkers: true,
+        preserveViewport: true,
         polylineOptions: {
           strokeColor: "#3b6af5",
-          strokeWeight: 4,
+          strokeWeight: 5,
           strokeOpacity: 0.8,
+          zIndex: 100, // Keeps line above the map tiles
         },
       });
       rendererRef.current.setMap(map);
     }
 
     const service = new routesLib.DirectionsService();
-    const result = await service.route({
-      origin,
-      destination,
-      travelMode: google.maps.TravelMode.DRIVING,
-    });
 
-    rendererRef.current.setDirections(result);
-
-    const meters = result.routes[0]?.legs[0]?.distance?.value ?? 0;
-    onDistanceKm(Math.max(1, Math.round(meters / 1000)));
-  }, [routesLib, map, origin, destination, onDistanceKm]);
-
-  useEffect(() => {
     if (origin && destination) {
-      computeRoute();
+      service.route(
+        {
+          origin,
+          destination,
+          travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === "OK" && result && rendererRef.current) {
+            rendererRef.current.setDirections(result);
+            const meters = result.routes[0]?.legs[0]?.distance?.value ?? 0;
+            onDistanceKm(Math.max(1, Math.round(meters / 1000)));
+          }
+        }
+      );
     } else if (rendererRef.current) {
-      rendererRef.current.setMap(null);
-      rendererRef.current = null;
+      // Clear directions safely with type assertion
+      rendererRef.current.setDirections({ routes: [] } as any);
     }
-  }, [origin, destination, computeRoute]);
+
+    return () => {
+      if (rendererRef.current && (!origin || !destination)) {
+        rendererRef.current.setDirections({ routes: [] } as any);
+      }
+    };
+  }, [routesLib, map, origin, destination, onDistanceKm]);
 
   return null;
 }
@@ -247,7 +274,7 @@ function PinMarker({
   );
 }
 
-// ── Main inner component (needs to be inside APIProvider) ─────────────────────
+// ── Main inner component ──────────────────────────────────────────────────────
 interface BookingInnerProps {
   onRideRequested: () => void;
 }
@@ -336,9 +363,7 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
 
   return (
     <div className="grid lg:grid-cols-5 gap-6">
-      {/* Left: Form */}
       <div className="lg:col-span-2 space-y-5">
-        {/* Location inputs */}
         <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-foreground">Trip Details</h3>
 
@@ -360,7 +385,6 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
             dotColor="gold"
           />
 
-          {/* Distance */}
           <div className="border-t border-border pt-4 space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-foreground">Distance</label>
@@ -413,7 +437,6 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
           </div>
         </div>
 
-        {/* Vehicle selector */}
         <div className="bg-card border border-border rounded-2xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-3">Choose Vehicle</h3>
           <div className="grid grid-cols-2 gap-2">
@@ -442,7 +465,6 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
           </div>
         </div>
 
-        {/* Fare estimate */}
         <div className="bg-card border border-border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground">Fare Estimate</h3>
@@ -473,7 +495,6 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
         </button>
       </div>
 
-      {/* Right: Google Map */}
       <div className="lg:col-span-3">
         <div className="relative rounded-2xl overflow-hidden h-80 lg:h-full min-h-[480px] border border-border">
           <Map
@@ -499,7 +520,6 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
             )}
           </Map>
 
-          {/* Distance badge */}
           {pickupPos && dropoffPos && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-sm border border-border rounded-xl px-4 py-2 shadow-sm flex items-center gap-2 pointer-events-none">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
@@ -509,7 +529,6 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
             </div>
           )}
 
-          {/* Empty state */}
           {!pickupPos && !dropoffPos && (
             <div className="absolute inset-0 flex items-end justify-center pb-6 pointer-events-none">
               <div className="bg-card/90 backdrop-blur-sm border border-border rounded-xl px-4 py-2.5 shadow text-center">
@@ -523,7 +542,7 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
   );
 }
 
-// ── Exported wrapper with APIProvider ─────────────────────────────────────────
+// ── Main Export ──────────────────────────────────────────────────────────────
 interface Props {
   onRideRequested: () => void;
 }
