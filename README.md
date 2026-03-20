@@ -1,167 +1,147 @@
-Here is the complete, comprehensive **README.md** file in raw Markdown format. You can copy this entire block, create a file named `README.md` in your project's root directory, and paste it in.
+Since your group members are still getting comfortable with the command line and cloud setups, this README is designed to be a **"copy-paste" manual**. It covers everything from cloning the repo to setting up the API keys so they don't get stuck.
 
-````markdown
-# 🚖 RideGo - Full-Stack Taxi Booking System
+-----
 
-Welcome to the **RideGo** project! This repository contains both the frontend (Next.js) and the backend (Spring Boot) for our taxi booking application.
+# 🚖 RideGo - Taxi Booking System
 
----
+Welcome to the **RideGo** project\! This is a full-stack taxi booking application built with **Next.js 15 (Frontend)** and **Spring Boot (Backend)**.
 
-## 📋 Table of Contents
-1. [Prerequisites](#-prerequisites)
-2. [Project Structure](#-project-structure)
-3. [Setup: Frontend (Next.js)](#-1-setup-the-frontend-nextjs)
-4. [Setup: Backend (Spring Boot)](#-2-setup-the-backend-spring-boot)
-5. [Connecting Frontend to Backend](#-3-connecting-frontend-to-backend)
-6. [Common Issues & Fixes](#-common-issues--fixes)
-7. [Git Workflow for the Group](#-git-workflow-for-the-group)
+Follow this guide carefully to get the project running on your local machine.
 
----
+-----
 
 ## 📋 Prerequisites
-Before you start, ensure you have the following installed on your computer:
-* **Node.js (v18+)**: [Download here](https://nodejs.org/)
-* **Java JDK 17**: [Download here](https://www.oracle.com/java/technologies/downloads/)
-* **Maven**: Usually bundled with IntelliJ, but check with `mvn -v`.
-* **Git**: [Download here](https://git-scm.com/)
-* **IDE**: [IntelliJ IDEA](https://www.jetbrains.com/idea/) (Recommended for Java) and [VS Code](https://code.visualstudio.com/) (Recommended for Frontend).
 
----
+Before you start, make sure you have these installed:
 
-## 📁 Project Structure
-The project is split into two main folders:
-```text
-ridego-taxiapp/
-├── frontend/           # Next.js 15, React, Tailwind CSS
-│   ├── app/            # Main pages and layouts
-│   ├── components/     # UI components (Map, Booking Form, etc.)
-│   └── .env.local      # Local environment variables (API Keys)
-└── backend/            # Spring Boot (Java)
-    ├── src/main/java/  # Java Source Code
-    └── pom.xml         # Maven dependencies
-````
+  * **Node.js** (v18 or higher) - [Download here](https://nodejs.org/)
+  * **Java JDK 17** - [Download here](https://www.oracle.com/java/technologies/downloads/)
+  * **Maven** - (Usually comes with IntelliJ, but check `mvn -v` in terminal)
+  * **Git** - [Download here](https://git-scm.com/)
+  * **Google Cloud Console Account** (For Maps API Key)
 
 -----
 
 ## 🚀 1. Setup the Frontend (Next.js)
 
-1.  **Navigate to the frontend folder:**
+1.  **Clone the Repository:**
 
     ```bash
-    cd frontend
+    git clone https://github.com/your-username/ridego-taxiapp.git
+    cd ridego-taxiapp/frontend
     ```
 
-2.  **Install the packages:**
+2.  **Install Dependencies:**
 
     ```bash
     npm install
     ```
 
-3.  **Configure your API Key:**
-    Create a file named `.env.local` inside the `frontend` folder and paste the following:
+3.  **Configure Environment Variables:**
+    Create a file named `.env.local` in the `frontend` folder and paste this:
 
     ```text
-    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=YOUR_ACTUAL_GOOGLE_MAPS_KEY
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=YOUR_ACTUAL_API_KEY_HERE
     NEXT_PUBLIC_API_URL=http://localhost:8080
     ```
 
-    *Note: Ensure your Google Maps key has **Maps JavaScript API**, **Places API**, and **Directions API** enabled.*
+    > **Note:** Get your API Key from the [Google Cloud Console](https://console.cloud.google.com/). Ensure **Maps JavaScript API**, **Places API**, and **Directions API** are enabled.
 
-4.  **Start the development server:**
+4.  **Run the Development Server:**
 
     ```bash
     npm run dev
     ```
 
-    Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) to view the site.
+    Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) in your browser.
 
 -----
 
 ## ☕ 2. Setup the Backend (Spring Boot)
 
-1.  **Navigate to the backend folder:**
+1.  **Navigate to the Backend Folder:**
 
     ```bash
     cd ../backend
     ```
 
-2.  **Build and Install dependencies:**
+2.  **Build the Project:**
 
     ```bash
     mvn clean install
     ```
 
-3.  **Run the application:**
+3.  **Check the CORS Config:**
+    Make sure `src/main/java/com/taxi/taxiapp/WebConfig.java` exists. It should allow `http://localhost:3000` to talk to the server.
 
-      * **Using IntelliJ:** Open the `backend` folder, wait for Maven to load, and click the **Run** button on `TaxiappApplication.java`.
-      * **Using Terminal:**
-        ```bash
-        mvn spring-boot:run
-        ```
+4.  **Run the Application:**
+    You can run it via IntelliJ (click the "Play" button on `TaxiappApplication.java`) or via terminal:
 
-    The backend will run on [http://localhost:8080](https://www.google.com/search?q=http://localhost:8080).
+    ```bash
+    mvn spring-boot:run
+    ```
+
+    The backend will be live at [http://localhost:8080](https://www.google.com/search?q=http://localhost:8080).
 
 -----
 
-## 🔗 3. Connecting Frontend to Backend
+## 🛠️ Project Structure
 
-To ensure the Frontend can talk to the Backend without being blocked, check the `WebConfig.java` file in the backend. It should look like this:
-
-```java
-@Configuration
-public class WebConfig implements WebMvcConfigurer {
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000") // Trust our frontend
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowCredentials(true);
-    }
-}
+```text
+ridego-taxiapp/
+├── frontend/           # Next.js App
+│   ├── app/            # Pages and Layouts
+│   ├── components/     # UI Components (Map, BookingView)
+│   └── lib/            # Context and Mock Data
+└── backend/            # Spring Boot App
+    ├── src/main/java/  # Java Logic (Controllers, Models)
+    └── src/main/resources/ # Configuration (application.properties)
 ```
 
 -----
 
-## 🛠️ Common Issues & Fixes
+## 🛡️ Common Issues & Fixes
 
-### ❌ "CORS Blocked" / Login not working
+### 1\. "Mixed Content" or "CORS Error"
 
-  * **Fix:** Make sure the Backend is actually running. If the backend is off, the login will fail with a "Network Error".
+If the login button doesn't work and you see a red error in the F12 Console:
 
-### ❌ "Map is Black" / "Development Purposes Only"
+  * **Check:** Is the backend actually running?
+  * **Check:** Does your `WebConfig.java` in the backend allow `http://localhost:3000`?
 
-  * **Fix:** Check your `.env.local` file. Make sure the API key is correct and that you have enabled **Billing** on your Google Cloud project (even the free tier requires a card).
+### 2\. "Map is Black" or "ApiNotActivated"
 
-### ❌ Port 3000 or 8080 already in use
+If the map doesn't show up:
 
-  * **Fix:** A previous session didn't close properly. Run this command to kill the stuck process:
+  * **Check:** Did you enable **Maps JavaScript API** in Google Cloud?
+  * **Check:** Did you link a **Billing Account**? (Google gives $200 free credit, but needs a card on file).
+
+### 3\. "Port already in use"
+
+If you see an error about Port 3000 or 8080:
+
+  * **Fix:** Close any other terminals or IDEs running the app, or run:
     ```bash
-    # Windows (Command Prompt)
-    netstat -ano | findstr :3000
-    taskkill /PID <PID_NUMBER> /F
+    npx kill-port 3000
+    npx kill-port 8080
     ```
 
 -----
 
-## 🤝 Git Workflow for the Group
+## 🤝 How to Contribute (For Group Members)
 
-To keep our code clean and avoid overwriting each other's work:
-
-1.  **Pull latest changes** before you start working:
+1.  **Always Pull First:** Before you start working, get the latest code from the group.
     ```bash
     git pull origin main
     ```
-2.  **Create a branch** for your specific task:
+2.  **Create a Branch:** Don't work directly on `main`.
     ```bash
     git checkout -b feature/your-name-task
     ```
-3.  **Commit your work** with a clear message:
+3.  **Commit & Push:**
     ```bash
     git add .
-    git commit -m "Added the driver rating component"
-    ```
-4.  **Push your branch** and let the group know:
-    ```bash
+    git commit -m "Added new feature for X"
     git push origin feature/your-name-task
     ```
 
@@ -169,12 +149,9 @@ To keep our code clean and avoid overwriting each other's work:
 
 ## 🏁 Final Demo Checklist
 
-  * [ ] Frontend is live at localhost:3000.
-  * [ ] Backend is live at localhost:8080.
-  * [ ] Can log in as "Sarah Johnson" (Mock data).
-  * [ ] Selecting a location draws a **Blue Route** on the map.
+  * [ ] Frontend is running on port 3000.
+  * [ ] Backend is running on port 8080.
+  * [ ] Google Maps shows the route clearly (No black boxes).
+  * [ ] "Login Successful" message appears after signing in.
 
-<!-- end list -->
-
-```
-```
+**Need help?** Ask in the group chat or check the `pm2 logs` if you are working on the server\! 🚀
