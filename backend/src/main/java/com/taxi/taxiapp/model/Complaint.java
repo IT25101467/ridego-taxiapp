@@ -10,10 +10,12 @@ public class Complaint {
     private String status; // "OPEN", "RESOLVED"
     private String adminResponse;
     private String createdAt;
+    private String contactNumber;
+    private String category;
 
     public Complaint() {}
 
-    public Complaint(String id, String userId, String title, String description, String status, String adminResponse, String createdAt) {
+    public Complaint(String id, String userId, String title, String description, String status, String adminResponse, String createdAt, String contactNumber, String category) {
         this.id = id;
         this.userId = userId;
         this.title = title;
@@ -21,6 +23,8 @@ public class Complaint {
         this.status = status;
         this.adminResponse = adminResponse;
         this.createdAt = createdAt;
+        this.contactNumber = contactNumber;
+        this.category = category;
     }
 
     public String getId() { return id; }
@@ -43,4 +47,10 @@ public class Complaint {
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public String getContactNumber() { return contactNumber; }
+    public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 }

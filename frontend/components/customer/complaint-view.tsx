@@ -19,6 +19,8 @@ export interface Complaint {
   status: string;
   adminResponse: string;
   createdAt: string;
+  contactNumber?: string;
+  category?: string;
 }
 
 export default function ComplaintView() {
@@ -26,7 +28,10 @@ export default function ComplaintView() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Edit Modal States
   const [editingComplaint, setEditingComplaint] = useState<Complaint | null>(null);
@@ -56,7 +61,17 @@ export default function ComplaintView() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !description || !currentUser) return;
+    setErrorMsg("");
+
+    if (!title || !description || !currentUser || !category) {
+      setErrorMsg("Please fill in all required fields.");
+      return;
+    }
+
+    if (contactNumber && !/^\d{10}$/.test(contactNumber)) {
+      setErrorMsg("Contact number must be exactly 10 digits.");
+      return;
+    }
 
     try {
       // Create new complaint
@@ -67,15 +82,23 @@ export default function ComplaintView() {
           userId: currentUser.id,
           title,
           description,
+          contactNumber,
+          category
         }),
       });
       if (res.ok) {
         fetchComplaints();
         setTitle("");
         setDescription("");
+        setContactNumber("");
+        setCategory("");
+      } else {
+        const errorText = await res.text();
+        setErrorMsg(errorText || "Failed to submit complaint.");
       }
     } catch (err) {
       console.error("Failed to submit complaint", err);
+      setErrorMsg("An error occurred while submitting.");
     }
   };
 
@@ -130,6 +153,11 @@ export default function ComplaintView() {
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {errorMsg && (
+              <div className="p-3 bg-red-100 text-red-800 text-sm rounded-xl border border-red-200">
+                {errorMsg}
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Title</label>
               <input
@@ -141,6 +169,35 @@ export default function ComplaintView() {
                 required
               />
             </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Category <span className="text-red-500">*</span></label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  required
+                >
+                  <option value="" disabled>Select a category</option>
+                  <option value="APP_ISSUE">App Issue</option>
+                  <option value="DRIVER_BEHAVIOR">Driver Behavior</option>
+                  <option value="PAYMENT_ISSUE">Payment Issue</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Contact Number</label>
+                <input
+                  type="text"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                  placeholder="10-digit number"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Description</label>
               <textarea
@@ -176,7 +233,19 @@ export default function ComplaintView() {
               {complaints.map((c) => (
                 <div key={c.id} className="bg-card border border-border rounded-2xl p-5 flex flex-col gap-3">
                   <div className="flex justify-between items-start">
-                    <h4 className="font-semibold text-foreground">{c.title}</h4>
+                    <div>
+                      <h4 className="font-semibold text-foreground flex items-center gap-2">
+                        {c.title}
+                        {c.category && (
+                          <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 bg-secondary text-secondary-foreground rounded-full">
+                            {c.category.replace('_', ' ')}
+                          </span>
+                        )}
+                      </h4>
+                      {c.contactNumber && (
+                        <p className="text-xs text-muted-foreground mt-0.5">Contact: {c.contactNumber}</p>
+                      )}
+                    </div>
                     <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
                       c.status === 'OPEN' ? 'bg-yellow-100 text-yellow-800' :
                       c.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :

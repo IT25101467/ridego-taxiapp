@@ -4,6 +4,8 @@ import com.taxi.taxiapp.model.Complaint;
 import com.taxi.taxiapp.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import com.taxi.taxiapp.util.DataValidator;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,7 +52,15 @@ public class ComplaintController {
     }
 
     @PostMapping
-    public ResponseEntity<Complaint> addComplaint(@RequestBody Complaint complaint) {
+    public ResponseEntity<?> addComplaint(@RequestBody Complaint complaint) {
+        if (complaint.getContactNumber() != null && !complaint.getContactNumber().trim().isEmpty()) {
+            if (!DataValidator.isValidPhone(complaint.getContactNumber())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid contact number format.");
+            }
+        }
+        if (complaint.getCategory() == null || complaint.getCategory().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category is required.");
+        }
         return ResponseEntity.ok(complaintService.addComplaint(complaint));
     }
 

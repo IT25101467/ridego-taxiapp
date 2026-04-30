@@ -80,7 +80,9 @@ public class ComplaintRepository {
             desc, 
             c.getStatus(), 
             response, 
-            c.getCreatedAt()
+            c.getCreatedAt(),
+            c.getContactNumber() != null ? c.getContactNumber() : "",
+            c.getCategory() != null ? c.getCategory() : ""
         );
     }
 
@@ -95,7 +97,9 @@ public class ComplaintRepository {
         String status = parts.length > 4 ? parts[4] : "";
         String response = parts.length > 5 ? parts[5] : "";
         String createdAt = parts.length > 6 ? parts[6] : "";
+        String contactNumber = parts.length > 7 ? parts[7] : "";
+        String category = parts.length > 8 ? parts[8] : "";
 
-        return new Complaint(id, userId, title, desc, status, response, createdAt);
+        return new Complaint(id, userId, title, desc, status, response, createdAt, contactNumber, category);
     }
 }
