@@ -91,7 +91,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             <span className="text-lg font-bold text-foreground">RideGo</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
+          <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
           <p className="text-muted-foreground mt-1 leading-relaxed">Sign in to your account to continue</p>
 
           {/* Role selector */}
