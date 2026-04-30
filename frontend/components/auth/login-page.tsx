@@ -57,7 +57,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             Your ride,<br />your way.
           </h1>
           <p className="mt-4 text-primary-foreground/70 leading-relaxed text-lg">
-            Fast, safe, and reliable taxi booking across the city. Get where you need to go in minutes.
+            Fast, safe, and reliable taxi booking across the city. Get Where You Need In Minutes!!!!.
           </p>
           <div className="mt-10 grid grid-cols-3 gap-4">
             {[
