@@ -4,6 +4,7 @@ import com.taxi.taxiapp.model.Complaint;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,8 @@ public class ComplaintRepository {
     }
 
     public void saveComplaint(Complaint complaint) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(FILE_PATH, true), StandardCharsets.UTF_8))) {
             String data = formatComplaintData(complaint);
             writer.write(data);
             writer.newLine();
@@ -34,7 +36,8 @@ public class ComplaintRepository {
 
     public List<Complaint> getAllComplaints() {
         List<Complaint> complaints = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(FILE_PATH), StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
@@ -49,7 +52,8 @@ public class ComplaintRepository {
 
     public void updateComplaint(Complaint updatedComplaint) {
         List<Complaint> complaints = getAllComplaints();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, false))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(FILE_PATH, false), StandardCharsets.UTF_8))) {
             for (Complaint c : complaints) {
                 if (c.getId().equals(updatedComplaint.getId())) {
                     writer.write(formatComplaintData(updatedComplaint));

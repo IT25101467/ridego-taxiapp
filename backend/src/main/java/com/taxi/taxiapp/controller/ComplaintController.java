@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/complaints")
-@CrossOrigin(origins = "*") // Allows requests from the React frontend
 public class ComplaintController {
 
     private final ComplaintService complaintService;
@@ -18,6 +17,11 @@ public class ComplaintController {
     @Autowired
     public ComplaintController(ComplaintService complaintService) {
         this.complaintService = complaintService;
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("ComplaintController is working!");
     }
 
     // --- Admin Endpoints ---

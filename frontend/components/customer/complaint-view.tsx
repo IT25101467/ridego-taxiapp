@@ -3,6 +3,13 @@
 import { useState, useEffect } from "react";
 import { useApp } from "@/lib/app-context";
 import { API_BASE_URL } from "@/lib/config";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export interface Complaint {
   id: string;
@@ -19,8 +26,13 @@ export default function ComplaintView() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Edit Modal States
+  const [editingComplaint, setEditingComplaint] = useState<Complaint | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -47,38 +59,48 @@ export default function ComplaintView() {
     if (!title || !description || !currentUser) return;
 
     try {
-      if (editingId) {
-        // Edit existing complaint
-        const res = await fetch(`${API_BASE_URL}/complaints/${editingId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, description }),
-        });
-        if (res.ok) {
-          fetchComplaints();
-          setEditingId(null);
-          setTitle("");
-          setDescription("");
-        }
-      } else {
-        // Create new complaint
-        const res = await fetch(`${API_BASE_URL}/complaints`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: currentUser.id,
-            title,
-            description,
-          }),
-        });
-        if (res.ok) {
-          fetchComplaints();
-          setTitle("");
-          setDescription("");
-        }
+      // Create new complaint
+      const res = await fetch(`${API_BASE_URL}/complaints`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          title,
+          description,
+        }),
+      });
+      if (res.ok) {
+        fetchComplaints();
+        setTitle("");
+        setDescription("");
       }
     } catch (err) {
       console.error("Failed to submit complaint", err);
+    }
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTitle || !editDescription || !editingComplaint) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/complaints/${editingComplaint.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          title: editTitle, 
+          description: editDescription 
+        }),
+      });
+      if (res.ok) {
+        fetchComplaints();
+        setIsEditModalOpen(false);
+        setEditingComplaint(null);
+        setEditTitle("");
+        setEditDescription("");
+      }
+    } catch (err) {
+      console.error("Failed to update complaint", err);
     }
   };
 
@@ -87,15 +109,10 @@ export default function ComplaintView() {
       alert("You can only edit OPEN complaints.");
       return;
     }
-    setEditingId(complaint.id);
-    setTitle(complaint.title);
-    setDescription(complaint.description);
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setTitle("");
-    setDescription("");
+    setEditingComplaint(complaint);
+    setEditTitle(complaint.title);
+    setEditDescription(complaint.description);
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -109,7 +126,7 @@ export default function ComplaintView() {
         {/* Form */}
         <div className="bg-card border border-border rounded-2xl p-6 h-fit">
           <h3 className="text-sm font-semibold text-foreground mb-5">
-            {editingId ? "Edit Complaint" : "File a New Complaint"}
+            File a New Complaint
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -136,23 +153,12 @@ export default function ComplaintView() {
               />
             </div>
 
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="flex-1 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition"
-              >
-                {editingId ? "Update Complaint" : "Submit Complaint"}
-              </button>
-              {editingId && (
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="px-4 py-2.5 bg-secondary text-secondary-foreground rounded-xl font-semibold text-sm hover:bg-secondary/80 transition"
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
+            <button
+              type="submit"
+              className="w-full py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition"
+            >
+              Submit Complaint
+            </button>
           </form>
         </div>
 
@@ -205,6 +211,53 @@ export default function ComplaintView() {
           )}
         </div>
       </div>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none bg-background rounded-2xl">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="text-xl font-bold">Edit Complaint</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdate}>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Title</label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/30 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Description</label>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={5}
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-muted/30 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter className="p-6 pt-0 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="flex-1 py-2.5 bg-secondary text-secondary-foreground rounded-xl font-semibold text-sm hover:bg-secondary/80 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-[2] py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition shadow-lg shadow-primary/20"
+              >
+                Update Complaint
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
