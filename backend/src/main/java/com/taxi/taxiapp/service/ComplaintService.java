@@ -77,13 +77,7 @@ public class ComplaintService {
         List<Complaint> allComplaints = complaintRepository.getAllComplaints();
         boolean removed = allComplaints.removeIf(c -> c.getId().equals(id));
         if (removed) {
-            // Repopulate the file
-            // Easiest way with our simple repo is to clear and rewrite, but we didn't implement a clear method.
-            // Let's implement it here as a workaround: just update the repo to an empty list then save all.
-            // Actually, updateComplaint method overwrites if we change it, but it doesn't handle deletion well.
-            // Since this is file based, let's just create a new Complaint dummy with that ID and update it? No.
-            // Let's add a delete method to repository later if needed. For now, users usually can't delete complaints.
-            // We will omit delete for now as it's not strictly required by the prompt ("add, edit, view, respond, mark status").
+            complaintRepository.deleteComplaint(id);
         }
         return removed;
     }

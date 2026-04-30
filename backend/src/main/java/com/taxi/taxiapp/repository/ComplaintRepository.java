@@ -67,6 +67,21 @@ public class ComplaintRepository {
         }
     }
 
+    public void deleteComplaint(String id) {
+        List<Complaint> complaints = getAllComplaints();
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(FILE_PATH, false), StandardCharsets.UTF_8))) {
+            for (Complaint c : complaints) {
+                if (!c.getId().equals(id)) {
+                    writer.write(formatComplaintData(c));
+                    writer.newLine();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error deleting complaint from file: " + e.getMessage());
+        }
+    }
+
     private String formatComplaintData(Complaint c) {
         // Replace | and newlines in description/response to avoid breaking the file format
         String desc = c.getDescription() != null ? c.getDescription().replace("|", " ").replace("\n", " ") : "";

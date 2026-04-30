@@ -138,6 +138,25 @@ export default function ComplaintView() {
     setIsEditModalOpen(true);
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this complaint?")) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/complaints/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchComplaints();
+      } else {
+        const errorText = await res.text();
+        alert(errorText || "Failed to delete complaint.");
+      }
+    } catch (err) {
+      console.error("Failed to delete complaint", err);
+      alert("An error occurred while deleting.");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -266,12 +285,20 @@ export default function ComplaintView() {
                   <div className="flex justify-between items-center mt-1">
                     <span className="text-xs text-muted-foreground">{new Date(c.createdAt).toLocaleDateString()}</span>
                     {c.status === "OPEN" && (
-                      <button 
-                        onClick={() => handleEdit(c)}
-                        className="text-xs font-medium text-primary hover:underline"
-                      >
-                        Edit
-                      </button>
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => handleEdit(c)}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(c.id)}
+                          className="text-xs font-medium text-red-500 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

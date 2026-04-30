@@ -74,4 +74,13 @@ public class ComplaintController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteComplaint(@PathVariable String id) {
+        boolean isDeleted = complaintService.deleteComplaint(id);
+        if (isDeleted) {
+            return ResponseEntity.ok("Complaint deleted successfully.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Complaint not found or could not be deleted.");
+    }
 }
