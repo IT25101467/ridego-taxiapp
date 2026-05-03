@@ -1,0 +1,8 @@
+A-001|Admin User|admin@ridego.com|admin123|admin|0771111111|true
+c1|Sarah Johnson|sarah@example.com|password|customer|0712222222|true
+c2|Mike Smith|mike@example.com|pass123|customer|0713333333|true
+d1|Nimal Perera|nimal@example.com|password|driver|0724444444|true
+d2|Driver Two|driver2@example.com|pass123|driver|0725555555|true
+c91145|Isath Nenuka|isath@email.com|isath123|customer|+94714079117|true
+c73854|aa|aa@email.com|1234|customer|+974748757777|true
+c8044|Isath Nenuka|isath@gmail.com|isath|customer|+9477777777777|true

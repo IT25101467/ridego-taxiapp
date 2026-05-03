@@ -1,0 +1,9 @@
+B4056|c1|d1|Homagama, Sri Lanka|Kottawa Town, Pannipitiya, Sri Lanka|0.0|200.0|COMPLETED
+B261|c1|d3|Homagama, Sri Lanka|Kottawa Town, Pannipitiya, Sri Lanka|0.0|200.0|COMPLETED
+B5887|c1|null|A|B|0.0|1320.0|COMPLETED
+B6921|c1|null|Anuradhapura, Sri Lanka|Vavuniya, Sri Lanka|58.0|3480.0|COMPLETED
+B1297|c1|d1|Homagama Town, Homagama, Sri Lanka|Horana, Sri Lanka|19.0|2480.0|COMPLETED	
+B665|c1|d1|Ella, Sri Lanka|Dambulla, Sri Lanka|164.0|19880.0|COMPLETED
+B4473|c1|d2|1|2|48.0|5960.0|COMPLETED
+B855|c1|null|Galle, Sri Lanka|Dambulla, Sri Lanka|257.0|15420.0|COMPLETED
+B3829|c8044|null|23A, Atulugama Rd, Bandaragama 12530, Sri Lanka|Homagama, Sri Lanka|22.0|1320.0|PENDING
