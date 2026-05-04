@@ -5,6 +5,10 @@ public abstract class User {
     private String id;
     private String name;
     private String email;
+    /**
+     * User's encrypted password.
+     * Note: Should be hashed using BCrypt or similar strong hashing algorithm before storage.
+     */
     private String password;
     private String phoneNumber;
 

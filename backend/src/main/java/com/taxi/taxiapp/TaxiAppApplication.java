@@ -8,6 +8,7 @@ public class TaxiAppApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(TaxiAppApplication.class, args);
+        System.out.println("RideGo Taxi Application started successfully!");
     }
 
 }
