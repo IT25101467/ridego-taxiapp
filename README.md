@@ -1,6 +1,5 @@
-Since your group members are still getting comfortable with the command line and cloud setups, this README is designed to be a **"copy-paste" manual**. It covers everything from cloning the repo to setting up the API keys so they don't get stuck.
-
------
+## Live Server Link : https://ridego.duckdns.org/
+## Live Server IP   : http://159.65.6.142/
 
 # 🚖 RideGo - Taxi Booking System
 
