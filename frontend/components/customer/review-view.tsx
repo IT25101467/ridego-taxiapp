@@ -5,13 +5,22 @@ import { useApp } from "@/lib/app-context";
 import { Review } from "@/lib/mock-data";
 
 export default function ReviewView() {
-  const { currentUser, reviews, addReview } = useApp();
+  const { currentUser, reviews, addReview, customers } = useApp();
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [comment, setComment] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const myReviews = reviews.filter((r) => r.customerId === currentUser?.id);
+  const publicReviews = reviews.filter((r) => r.customerId !== currentUser?.id);
+  const reviewCount = myReviews.length;
+  const currentUserName = currentUser?.name || "You";
+
+  // Helper function to get customer name by ID
+  const getCustomerName = (customerId: string) => {
+    const customer = customers.find((c) => c.id === customerId);
+    return customer?.name || "Anonymous";
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,13 +44,17 @@ export default function ReviewView() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-bold text-foreground">Leave a Review</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Share your experience with RideGo</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Share your experience with RideGo and help us improve every ride.</p>
+        <p className="text-sm text-muted-foreground mt-3">You have submitted <span className="font-semibold text-foreground">{reviewCount}</span> review{reviewCount === 1 ? "" : "s"} so far.</p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Review form */}
-        <div className="bg-card border border-border rounded-2xl p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-5">Rate Your Experience</h3>
+        <div className="bg-card border border-border rounded-[28px] p-6 shadow-sm shadow-slate-200/40">
+          <div className="flex flex-col gap-2 mb-6">
+            <h3 className="text-base font-semibold text-foreground">Rate Your Experience</h3>
+            <p className="text-sm text-muted-foreground">Add a rating and short comment to help us improve your next ride.</p>
+          </div>
 
           {submitted ? (
             <div className="py-8 text-center">
@@ -51,13 +64,13 @@ export default function ReviewView() {
                 </svg>
               </div>
               <p className="font-semibold text-foreground">Thank you for your review!</p>
-              <p className="text-sm text-muted-foreground mt-1">Your feedback helps us improve.</p>
+              <p className="text-sm text-muted-foreground mt-1">Your feedback helps us improve every ride.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Star rating */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Rating</label>
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-foreground">Rating</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -66,11 +79,11 @@ export default function ReviewView() {
                       onClick={() => setRating(star)}
                       onMouseEnter={() => setHovered(star)}
                       onMouseLeave={() => setHovered(0)}
-                      className="transition-transform hover:scale-110"
+                      className="h-12 w-12 rounded-2xl border border-border bg-card flex items-center justify-center transition hover:-translate-y-0.5 hover:border-primary hover:text-primary"
                     >
                       <svg
-                        width="32"
-                        height="32"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill={(hovered || rating) >= star ? "currentColor" : "none"}
                         stroke="currentColor"
@@ -85,28 +98,26 @@ export default function ReviewView() {
                   ))}
                 </div>
                 {rating > 0 && (
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    {["", "Poor", "Fair", "Good", "Very Good", "Excellent"][rating]}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{["", "Poor", "Fair", "Good", "Very Good", "Excellent"][rating]}</p>
                 )}
               </div>
 
               {/* Comment */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Your Review</label>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">Your Review</label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Tell us about your experience..."
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition resize-none leading-relaxed"
+                  rows={5}
+                  className="w-full min-h-[150px] px-4 py-3 rounded-3xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition resize-none leading-relaxed shadow-sm"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={rating === 0}
-                className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 rounded-3xl bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/20 transition hover:bg-primary/95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Submit Review
               </button>
@@ -114,27 +125,39 @@ export default function ReviewView() {
           )}
         </div>
 
-        {/* Past reviews */}
+        {/* Personal reviews */}
         <div>
-          <h3 className="text-sm font-semibold text-foreground mb-3">Your Reviews</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-2">Your Reviews</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            You have left <span className="font-semibold text-foreground">{reviewCount}</span> review{reviewCount === 1 ? "" : "s"}. See your ratings and comments below.
+          </p>
           {myReviews.length === 0 ? (
-            <div className="bg-card border border-border rounded-2xl p-8 text-center">
+            <div className="bg-card border border-border rounded-3xl p-8 text-center shadow-sm">
               <p className="text-sm text-muted-foreground">No reviews yet. Share your first experience!</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {myReviews.map((review) => (
-                <div key={review.id} className="bg-card border border-border rounded-2xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} width="14" height="14" viewBox="0 0 24 24"
-                          fill={review.rating >= star ? "currentColor" : "none"}
-                          stroke="currentColor" strokeWidth="1.5"
-                          className={review.rating >= star ? "text-accent" : "text-border"}>
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                      ))}
+                <div key={review.id} className="bg-card border border-border rounded-3xl p-5 shadow-sm">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{getCustomerName(review.customerId)}</p>
+                      <div className="flex gap-0.5 mt-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <svg
+                            key={star}
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill={review.rating >= star ? "currentColor" : "none"}
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            className={review.rating >= star ? "text-accent" : "text-border"}
+                          >
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
+                        ))}
+                      </div>
                     </div>
                     <span className="text-xs text-muted-foreground">{review.date}</span>
                   </div>
@@ -143,6 +166,48 @@ export default function ReviewView() {
               ))}
             </div>
           )}
+
+          <div className="mt-10">
+            <h3 className="text-sm font-semibold text-foreground mb-2">Community Reviews</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              See what other customers are saying about RideGo.
+            </p>
+            {publicReviews.length === 0 ? (
+              <div className="bg-card border border-border rounded-3xl p-8 text-center shadow-sm">
+                <p className="text-sm text-muted-foreground">There are no community reviews yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {publicReviews.map((review) => (
+                  <div key={review.id} className="bg-card border border-border rounded-3xl p-5 shadow-sm">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{getCustomerName(review.customerId)}</p>
+                        <div className="flex gap-0.5 mt-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg
+                              key={star}
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill={review.rating >= star ? "currentColor" : "none"}
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              className={review.rating >= star ? "text-accent" : "text-border"}
+                            >
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{review.date}</span>
+                    </div>
+                    <p className="text-sm text-foreground leading-relaxed">{review.comment || "No comment provided."}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
