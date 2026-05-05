@@ -1,4 +1,4 @@
-"use client";
+"Use client";
 
 import { useState } from "react";
 import { useApp } from "@/lib/app-context";
@@ -57,7 +57,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             Your ride,<br />your way.
           </h1>
           <p className="mt-4 text-primary-foreground/70 leading-relaxed text-lg">
-            Fast, safe, and reliable taxi booking across the city. Get Where You Need In Minutes!!!!.
+            Fast, Safe, And Reliable Taxi Booking Across The City. Get Where You Need In Minutes!!!!.
           </p>
           <div className="mt-10 grid grid-cols-3 gap-4">
             {[
@@ -72,7 +72,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             ))}
           </div>
         </div>
-        <p className="text-primary-foreground/40 text-sm">© 2025 RideGo. All rights reserved.</p>
+        <p className="text-primary-foreground/40 text-sm">© 2026 RideGo. All rights reserved.</p>
       </div>
 
       {/* Right panel */}
@@ -162,7 +162,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
           {/* Demo hints */}
           <div className="mt-6 p-4 bg-muted rounded-xl">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Demo accounts</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Demo Accounts</p>
             <div className="space-y-1 text-xs text-muted-foreground">
               <p><span className="font-medium text-foreground">Customer:</span> sarah@example.com / password</p>
               <p><span className="font-medium text-foreground">Driver:</span> nimal@example.com / password</p>
