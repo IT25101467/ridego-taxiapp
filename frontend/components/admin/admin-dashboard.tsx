@@ -5,6 +5,7 @@ import Sidebar from "@/components/shared/sidebar";
 import AllBookingsView from "./all-bookings-view";
 import UserManagementView from "./user-management-view";
 import AdminComplaintsView from "./admin-complaints-view";
+import AdminReviewsView from "./admin-reviews-view";
 
 function BookIcon() {
   return (
@@ -33,9 +34,18 @@ function MessageSquareIcon() {
   );
 }
 
+function StarIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  );
+}
+
 const navItems = [
   { id: "bookings", label: "All Bookings", icon: <BookIcon /> },
   { id: "users", label: "User Management", icon: <UsersIcon /> },
+  { id: "reviews", label: "Reviews", icon: <StarIcon /> },
   { id: "complaints", label: "Complaints", icon: <MessageSquareIcon /> },
 ];
 
@@ -54,6 +64,7 @@ export default function AdminDashboard() {
         <div className="p-6 max-w-6xl mx-auto">
           {activeView === "bookings" && <AllBookingsView />}
           {activeView === "users" && <UserManagementView />}
+          {activeView === "reviews" && <AdminReviewsView />}
           {activeView === "complaints" && <AdminComplaintsView />}
         </div>
       </main>
