@@ -1,40 +1,42 @@
 package com.taxi.taxiapp.model;
 
-/**
- * ENCAPSULATION: We secure the booking data in this class.
- * This acts as the "Transaction" record for every ride requested.
- */
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "ride_bookings")
 public class RideBooking {
 
-    private String bookingId;
-    private String passengerId; // Who requested the ride
-    private String driverId;    // Who the Admin assigns to the ride (starts as null)
-    private String vehicleId;   // What car they are driving
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;  // ✅ DB primary key
+
+    private String passengerId;
+    private String driverId;
+    private String vehicleId;
+
     private String pickupLocation;
     private String dropoffLocation;
+
     private double distanceInKm;
     private double calculatedFare;
 
-    // Status can be: "PENDING", "ASSIGNED", "COMPLETED", "CANCELED"
     private String status;
 
+    // ✅ Default constructor (JPA needs this)
     public RideBooking() {}
 
-    // Constructor for when a Passenger first requests a ride
-    // Notice driverId, vehicleId, and fare are NOT here yet, because the admin hasn't assigned them!
-    public RideBooking(String bookingId, String passengerId, String pickupLocation, String dropoffLocation, double distanceInKm) {
-        this.bookingId = bookingId;
+    // ✅ Optional constructor
+    public RideBooking(String passengerId, String pickupLocation, String dropoffLocation, double distanceInKm) {
         this.passengerId = passengerId;
         this.pickupLocation = pickupLocation;
         this.dropoffLocation = dropoffLocation;
         this.distanceInKm = distanceInKm;
-        this.status = "PENDING"; // All new rides start as pending
+        this.status = "PENDING";
     }
 
-    // --- Getters and Setters (Encapsulation) ---
+    // --- Getters & Setters ---
 
-    public String getBookingId() { return bookingId; }
-    public void setBookingId(String bookingId) { this.bookingId = bookingId; }
+    public Long getId() { return id; }
 
     public String getPassengerId() { return passengerId; }
     public void setPassengerId(String passengerId) { this.passengerId = passengerId; }

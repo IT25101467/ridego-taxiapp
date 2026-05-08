@@ -1,27 +1,22 @@
 package com.taxi.taxiapp.model;
 
-public abstract class User {
+import jakarta.persistence.*;
 
-    private String id;
+@Entity
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
     private String name;
     private String email;
-    /**
-     * User's encrypted password.
-     * Note: Should be hashed using BCrypt or similar strong hashing algorithm before storage.
-     */
     private String password;
     private String phoneNumber;
 
-    public User(String id, String name, String email, String password, String phoneNumber) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.phoneNumber = phoneNumber;
-    }
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public User() {} // ❗ IMPORTANT (JPA needs this)
 
+    // getters setters
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
@@ -33,11 +28,4 @@ public abstract class User {
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
-
-    // POLYMORPHISM/ABSTRACTION
-
-    public abstract String getDashboardMenu();
-
-
-
 }
