@@ -7,3 +7,4 @@ c91145|Isath Nenuka|isath@email.com|isath123|customer|+94714079117|true
 c73854|aa|aa@email.com|1234|customer|+974748757777|true
 c8044|Isath Nenuka|isath@gmail.com|isath|customer|+9477777777777|true
 c99881|Bimalsha Erandi |bimalshaerandihansani@gmail.com|2004/05/08|customer|0763788313|true
+c92748|Kasun|kasun@gmail.com|1234|customer|0771234567|true

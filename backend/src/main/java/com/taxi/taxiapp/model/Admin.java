@@ -1,7 +1,7 @@
 package com.taxi.taxiapp.model;
 
 // INHERITANCE
-public class Admin extends User {
+public class Admin extends User  {
 
     // ENCAPSULATION
     private String adminRole; // e.g., "Dispatcher" or "SuperAdmin"
@@ -15,8 +15,5 @@ public class Admin extends User {
     public void setAdminRole(String adminRole) { this.adminRole = adminRole; }
 
     // POLYMORPHISM
-    @Override
-    public String getDashboardMenu() {
-        return "Admin Dashboard: 1. View Pending Rides | 2. Assign Driver to Ride | 3. Manage Fleet";
-    }
+   
 }

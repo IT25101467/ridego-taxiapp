@@ -3,6 +3,7 @@ package com.taxi.taxiapp.service;
 import com.taxi.taxiapp.model.RideBooking;
 import com.taxi.taxiapp.model.Vehicle;
 import com.taxi.taxiapp.repository.RideRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,27 +15,33 @@ public class BookingService {
     @Autowired
     private RideRepository rideRepository;
 
-    // 🔹 Save booking (CREATE)
+    // CREATE
     public RideBooking saveBooking(RideBooking booking) {
-        return rideRepository.save(booking); // 🔥 auto DB insert
+        return rideRepository.save(booking);
     }
 
-    // 🔹 Get all bookings (READ)
+    // READ all
     public List<RideBooking> getAllBookings() {
         return rideRepository.findAll();
     }
 
-    // 🔹 Get booking by ID
+    // READ by id
     public RideBooking getBookingById(Long id) {
         return rideRepository.findById(id).orElse(null);
     }
 
-    // 🔹 Assign driver (UPDATE)
+    // READ pending rides
+    public List<RideBooking> getPendingRides() {
+        return rideRepository.findByStatus("PENDING");
+    }
+
+    // ASSIGN driver
     public void assignDriverToRide(Long bookingId, String driverId, Vehicle vehicle) {
 
         RideBooking booking = rideRepository.findById(bookingId).orElse(null);
 
         if (booking != null) {
+
             double fare = vehicle.calculateFare(booking.getDistanceInKm());
 
             booking.setDriverId(driverId);
@@ -45,16 +52,17 @@ public class BookingService {
             rideRepository.save(booking);
         }
     }
-    // 🔹 Complete ride (UPDATE)
+
+    // COMPLETE ride
     public void completeRide(Long bookingId, String driverId) {
 
-     RideBooking booking = rideRepository.findById(bookingId).orElse(null);
+        RideBooking booking = rideRepository.findById(bookingId).orElse(null);
 
-     if (booking != null) {
-        booking.setStatus("COMPLETED");
-        booking.setDriverId(driverId);
+        if (booking != null) {
 
-        rideRepository.save(booking);
+            booking.setStatus("COMPLETED");
+
+            rideRepository.save(booking);
+        }
     }
-}
 }

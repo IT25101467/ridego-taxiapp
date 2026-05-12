@@ -22,29 +22,28 @@ public class BookingController {
     @Autowired
     private BookingService bookingService;
 
-    // ✅ CREATE ride (DB insert)
+    //  CREATE ride (DB insert)
     @PostMapping("/request")
     public RideBooking requestRide(@RequestBody RideBooking newBooking) {
 
         newBooking.setStatus("PENDING");
 
-        // 🔥 JPA will auto generate ID
         return rideRepository.save(newBooking);
     }
 
-    // ✅ READ all
+    //  READ all
     @GetMapping("/all")
     public List<RideBooking> getAllBookings() {
         return rideRepository.findAll();
     }
 
-    // ✅ READ pending
+    //  READ pending
     @GetMapping("/pending")
     public List<RideBooking> getPendingRides() {
         return bookingService.getPendingRides();
     }
 
-    // ✅ ASSIGN driver
+    // ASSIGN driver
     @PutMapping("/assign/{id}")
     public String assignDriver(@PathVariable Long id,
                                @RequestParam String driverId) {
@@ -56,10 +55,13 @@ public class BookingController {
         return "Driver assigned successfully!";
     }
 
-    // ✅ COMPLETE ride
-  @PutMapping("/complete/{bookingId}")
-public String finishTrip(@PathVariable Long bookingId, @RequestParam String driverId) {
-    bookingService.completeRide(bookingId, driverId); 
-    return "Trip completed successfully!";
-}
+    //  COMPLETE ride
+    @PutMapping("/complete/{bookingId}")
+    public String finishTrip(@PathVariable Long bookingId,
+                            @RequestParam String driverId) {
+
+        bookingService.completeRide(bookingId, driverId);
+
+        return "Trip completed successfully!";
+    }
 }

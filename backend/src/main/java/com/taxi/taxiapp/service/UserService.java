@@ -12,7 +12,21 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    // ✅ REGISTER
     public User registerUser(User user) {
-        return userRepository.save(user); // 🔥 DB insert here
+        return userRepository.save(user);
+    }
+
+    // ✅ LOGIN
+    public User login(String email, String password) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return user;
     }
 }
