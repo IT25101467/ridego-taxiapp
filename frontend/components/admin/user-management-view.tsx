@@ -55,7 +55,7 @@ interface UserModalProps {
 function UserModal({ mode, type, initial, onClose, onSave }: UserModalProps) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
-  const [phone, setPhone] = useState(initial?.phone ?? "");
+  const [phone, setPhone] = useState(initial?.phoneNumber ?? "");
   const [password, setPassword] = useState(initial?.password ?? "password");
 
   function handleSubmit(e: React.FormEvent) {

@@ -33,6 +33,7 @@ public class User {
 
     // getters
     public String getName() { return name; }
+    public int getId() {return id;}
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public String getPhoneNumber() { return phoneNumber; }

@@ -1,76 +1,98 @@
+
 package com.taxi.taxiapp.controller;
 
+import com.taxi.taxiapp.model.User;
+import com.taxi.taxiapp.repository.UserRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.io.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
+
+    @Autowired
+    private UserRepository userRepository;
 
     private final String FILE_PATH = "users.txt";
 
     /**
      * REGISTER: Saves a new user to the bottom of users.txt
      */
-    @PostMapping("/register")
-    public Map<String, Object> register(@RequestBody Map<String, String> userData) {
-        String name = userData.get("name");
-        String email = userData.get("email");
-        String password = userData.get("password");
-        String role = userData.get("role");
-        String phone = userData.get("phone");
+   @PostMapping("/register")
+public Map<String, Object> register(@RequestBody Map<String, String> userData) {
 
-        // 1. Generate a unique ID (c for customer, d for driver)
-        String prefix = role.equalsIgnoreCase("driver") ? "d" : "c";
-        String id = prefix + (System.currentTimeMillis() % 100000); // Short unique ID
+    Map<String, Object> response = new HashMap<>();
 
-        // 2. Format: ID|Name|Email|Password|Role|Phone|Available
-        String newLine = String.join("|", id, name, email, password, role, phone, "true");
+    try {
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-            writer.write(newLine);
-            writer.newLine();
+        User user = new User();
 
-            System.out.println("✅ REGISTER SUCCESS: New " + role + " created with ID " + id);
-            return Map.of("success", true, "id", id);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Map.of("error", "Database write failed.");
-        }
+        user.setName(userData.get("name"));
+        user.setEmail(userData.get("email"));
+        user.setPassword(userData.get("password"));
+        user.setRole(userData.get("role"));
+        user.setPhoneNumber(userData.get("phone"));
+
+        User savedUser = userRepository.save(user);
+
+        response.put("success", true);
+        response.put("id", savedUser.getId());
+
+        System.out.println("✅ USER SAVED TO DATABASE");
+
+        return response;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+
+        response.put("error", "Registration failed");
+
+        return response;
     }
+}
 
     /**
      * LOGIN: Checks if email/password/role matches a line in users.txt
      */
-    @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password");
-        String role = credentials.get("role");
+  
+@PostMapping("/login")
+public Map<String, Object> login(@RequestBody Map<String, String> loginData) {
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] p = line.split("\\|");
-                if (p.length >= 7) {
-                    if (p[2].equals(email) && p[3].equals(password) && p[4].equalsIgnoreCase(role)) {
-                        Map<String, Object> user = new HashMap<>();
-                        user.put("id", p[0]);
-                        user.put("name", p[1]);
-                        user.put("email", p[2]);
-                        user.put("role", p[4]);
-                        user.put("phone", p[5]);
-                        user.put("available", Boolean.parseBoolean(p[6]));
-                        return user;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    Map<String, Object> response = new HashMap<>();
+
+    String email = loginData.get("email");
+    String password = loginData.get("password");
+    String role = loginData.get("role");
+
+    Optional<User> optionalUser = userRepository.findByEmail(email);
+
+    if (optionalUser.isPresent()) {
+
+        User user = optionalUser.get();
+
+        if (
+            user.getPassword().equals(password)
+            && user.getRole().equalsIgnoreCase(role)
+        ) {
+
+            response.put("id", user.getId());
+            response.put("name", user.getName());
+            response.put("email", user.getEmail());
+            response.put("role", user.getRole());
+            response.put("phone", user.getPhoneNumber());
+
+            return response;
         }
-        return Map.of("error", "Invalid email or password.");
     }
+
+    response.put("error", "Invalid email or password");
+    return response;
+}
 
     /**
      * GET ALL: Used by the Admin to see everyone in the system
@@ -88,7 +110,7 @@ public class UserController {
                     user.put("name", p[1]);
                     user.put("email", p[2]);
                     user.put("role", p[4]);
-                    user.put("phone", p[5]);
+                    user.put("phoneNumber", p[5]);
                     user.put("available", Boolean.parseBoolean(p[6]));
                     users.add(user);
                 }

@@ -1,12 +1,10 @@
 package com.taxi.taxiapp.repository;
 
-import java.util.Optional;
-
+import com.taxi.taxiapp.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.taxi.taxiapp.model.User;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-
-    Optional<User> findByEmail(String email);
+Optional<User> findByEmail(String email);
 }

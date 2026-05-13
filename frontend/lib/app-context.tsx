@@ -111,24 +111,40 @@ useEffect(() => {
         console.error("Critical: Could not load data from Java server.", error);
       }
     }
-    loadRealData();
+    //loadRealData();
   }, []);
 
 
   // --- REAL JAVA REGISTRATION ---
   async function register(userData: any): Promise<boolean> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
-      return response.ok;
-    } catch (error) {
-      console.error("Registration failed", error);
+  try {
+
+    console.log("REGISTER DATA:", userData);
+
+    const response = await fetch(`${API_BASE_URL}/users/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
+
+    const data = await response.json();
+
+    console.log("REGISTER RESPONSE:", data);
+
+    if (!response.ok || data.error) {
+      alert(data.error || "Registration failed");
       return false;
     }
+
+    return true;
+
+  } catch (error) {
+    console.error("Registration failed", error);
+    return false;
   }
+}
 // --- REAL JAVA LOGIN ---
   async function login(email: string, password: string, role: string): Promise<boolean> {
     console.log(`Attempting real login for ${email} as ${role}...`);
