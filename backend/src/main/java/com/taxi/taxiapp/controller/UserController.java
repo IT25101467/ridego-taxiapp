@@ -192,5 +192,17 @@ public Map<String, Object> login(@RequestBody Map<String, String> loginData) {
         return Map.of("success", deleted);
     }
 
+    @PutMapping("/update/{id}")
+public User updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+
+    User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    user.setName(updatedUser.getName());
+    user.setEmail(updatedUser.getEmail());
+
+    return userRepository.save(user);
+}
+
 
 }

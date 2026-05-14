@@ -8,6 +8,7 @@ import CustomerDashboard from "@/components/customer/customer-dashboard";
 import DriverDashboard from "@/components/driver/driver-dashboard";
 import AdminDashboard from "@/components/admin/admin-dashboard";
 
+
 function AppRouter() {
   const { currentUser } = useApp();
   const [authPage, setAuthPage] = useState<"login" | "signup">("login");

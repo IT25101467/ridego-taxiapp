@@ -5,6 +5,7 @@ import com.taxi.taxiapp.model.RideBooking;
 import com.taxi.taxiapp.model.Vehicle;
 import com.taxi.taxiapp.repository.RideRepository;
 import com.taxi.taxiapp.service.BookingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,16 +16,13 @@ import java.util.List;
 
 
 
-
 public class BookingController {
 
-
-
-
-
-
-    private final RideRepository rideRepository = new RideRepository();
-    private final BookingService bookingService = new BookingService();
+    @Autowired
+    private RideRepository rideRepository;
+    
+    @Autowired
+    private BookingService bookingService;
 
 
     /**

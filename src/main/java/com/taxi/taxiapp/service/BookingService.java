@@ -5,6 +5,7 @@ import com.taxi.taxiapp.model.RideBooking;
 import com.taxi.taxiapp.model.Vehicle;
 import com.taxi.taxiapp.repository.RideRepository;
 import com.taxi.taxiapp.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,8 +14,11 @@ import java.util.stream.Collectors;
 @Service // This tells Spring Boot to manage this class
 public class BookingService {
 
-    private final RideRepository rideRepository = new RideRepository();
-    private final UserRepository userRepository = new UserRepository();
+    @Autowired
+    private RideRepository rideRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * LOGIC: Admin views only pending rides.

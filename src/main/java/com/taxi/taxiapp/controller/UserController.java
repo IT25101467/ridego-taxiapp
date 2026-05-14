@@ -1,7 +1,10 @@
 package com.taxi.taxiapp.controller;
 
+import com.taxi.taxiapp.model.UserEntity;
+import com.taxi.taxiapp.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.io.*;
+
 import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -9,10 +12,11 @@ import java.util.*;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final String FILE_PATH = "users.txt";
+    @Autowired
+    private UserRepository userRepository;
 
     /**
-     * REGISTER: Saves a new user to the bottom of users.txt
+     * REGISTER: Saves a new user to the database
      */
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody Map<String, String> userData) {
@@ -22,27 +26,20 @@ public class UserController {
         String role = userData.get("role");
         String phone = userData.get("phone");
 
-        // 1. Generate a unique ID (c for customer, d for driver)
-        String prefix = role.equalsIgnoreCase("driver") ? "d" : "c";
-        String id = prefix + (System.currentTimeMillis() % 100000); // Short unique ID
-
-        // 2. Format: ID|Name|Email|Password|Role|Phone|Available
-        String newLine = String.join("|", id, name, email, password, role, phone, "true");
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-            writer.write(newLine);
-            writer.newLine();
-
-            System.out.println("✅ REGISTER SUCCESS: New " + role + " created with ID " + id);
-            return Map.of("success", true, "id", id);
-        } catch (IOException e) {
+        try {
+            UserEntity newUser = new UserEntity(name, email, password, role, phone, true);
+            UserEntity savedUser = userRepository.save(newUser);
+            
+            System.out.println("✅ REGISTER SUCCESS: New " + role + " created with ID " + savedUser.getId());
+            return Map.of("success", true, "id", savedUser.getId());
+        } catch (Exception e) {
             e.printStackTrace();
             return Map.of("error", "Database write failed.");
         }
     }
 
     /**
-     * LOGIN: Checks if email/password/role matches a line in users.txt
+     * LOGIN: Checks if email/password/role matches a record in the database
      */
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String, String> credentials) {
@@ -50,24 +47,23 @@ public class UserController {
         String password = credentials.get("password");
         String role = credentials.get("role");
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] p = line.split("\\|");
-                if (p.length >= 7) {
-                    if (p[2].equals(email) && p[3].equals(password) && p[4].equalsIgnoreCase(role)) {
-                        Map<String, Object> user = new HashMap<>();
-                        user.put("id", p[0]);
-                        user.put("name", p[1]);
-                        user.put("email", p[2]);
-                        user.put("role", p[4]);
-                        user.put("phone", p[5]);
-                        user.put("available", Boolean.parseBoolean(p[6]));
-                        return user;
-                    }
+        try {
+            Optional<UserEntity> userOpt = userRepository.findByEmail(email);
+
+            if (userOpt.isPresent()) {
+                UserEntity userEntity = userOpt.get();
+                if (userEntity.getPassword().equals(password) && userEntity.getRole().equalsIgnoreCase(role)) {
+                    Map<String, Object> userMap = new HashMap<>();
+                    userMap.put("id", userEntity.getId().toString()); // Convert to string for frontend
+                    userMap.put("name", userEntity.getName());
+                    userMap.put("email", userEntity.getEmail());
+                    userMap.put("role", userEntity.getRole());
+                    userMap.put("phone", userEntity.getPhone());
+                    userMap.put("available", userEntity.getAvailable());
+                    return userMap;
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return Map.of("error", "Invalid email or password.");
@@ -78,98 +74,63 @@ public class UserController {
      */
     @GetMapping("/all")
     public List<Map<String, Object>> getAllUsers() {
-        List<Map<String, Object>> users = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] p = line.split("\\|");
-                if (p.length >= 7) {
-                    Map<String, Object> user = new HashMap<>();
-                    user.put("id", p[0]);
-                    user.put("name", p[1]);
-                    user.put("email", p[2]);
-                    user.put("role", p[4]);
-                    user.put("phone", p[5]);
-                    user.put("available", Boolean.parseBoolean(p[6]));
-                    users.add(user);
-                }
+        try {
+            List<UserEntity> allUsers = userRepository.findAll();
+            
+            List<Map<String, Object>> users = new ArrayList<>();
+            for (UserEntity u : allUsers) {
+                Map<String, Object> userMap = new HashMap<>();
+                userMap.put("id", u.getId().toString());
+                userMap.put("name", u.getName());
+                userMap.put("email", u.getEmail());
+                userMap.put("role", u.getRole());
+                userMap.put("phone", u.getPhone());
+                userMap.put("available", u.getAvailable());
+                users.add(userMap);
             }
-        } catch (IOException e) {
+            return users;
+        } catch (Exception e) {
             e.printStackTrace();
+            return new ArrayList<>();
         }
-        return users;
     }
 
-    //DRIVWE ONLINE TOGGLE
     /**
-     * TOGGLE AVAILABILITY: Updates the 'Available' column in users.txt
-     * URL: PUT http://localhost:8080/api/users/availability/{id}?status=true
+     * TOGGLE AVAILABILITY: Updates the 'available' column
      */
     @PutMapping("/availability/{id}")
-    public Map<String, Object> toggleAvailability(@PathVariable String id, @RequestParam boolean status) {
-        List<String> lines = new ArrayList<>();
-        boolean found = false;
-
-        // 1. READ the entire file into memory
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] p = line.split("\\|");
-                if (p[0].equals(id)) {
-                    // 2. MODIFY the specific line (Index 6 is the Available status)
-                    p[6] = String.valueOf(status);
-                    line = String.join("|", p);
-                    found = true;
-                }
-                lines.add(line);
+    public Map<String, Object> toggleAvailability(@PathVariable Integer id, @RequestParam boolean status) {
+        try {
+            Optional<UserEntity> userOpt = userRepository.findById(id);
+            if (userOpt.isPresent()) {
+                UserEntity user = userOpt.get();
+                user.setAvailable(status);
+                userRepository.save(user);
+                System.out.println("🔄 STATUS UPDATE: User " + id + " is now " + (status ? "ONLINE" : "OFFLINE"));
+                return Map.of("success", true);
+            } else {
+                return Map.of("error", "User not found");
             }
-        } catch (IOException e) {
-            return Map.of("error", "Failed to read database.");
-        }
-
-        // 3. WRITE everything back to the file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
-            for (String l : lines) {
-                writer.write(l);
-                writer.newLine();
-            }
-        } catch (IOException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             return Map.of("error", "Failed to update database.");
         }
-
-        System.out.println("🔄 STATUS UPDATE: User " + id + " is now " + (status ? "ONLINE" : "OFFLINE"));
-        return Map.of("success", found);
     }
-
 
     /**
-     * DELETE USER: Removes a user from users.txt
+     * DELETE USER: Removes a user from database
      */
     @DeleteMapping("/{id}")
-    public Map<String, Object> deleteUser(@PathVariable String id) {
-        List<String> lines = new ArrayList<>();
-        boolean deleted = false;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.startsWith(id + "|")) { // Keep everything EXCEPT the user we want to delete
-                    lines.add(line);
-                } else {
-                    deleted = true;
-                }
+    public Map<String, Object> deleteUser(@PathVariable Integer id) {
+        try {
+            if (userRepository.existsById(id)) {
+                userRepository.deleteById(id);
+                return Map.of("success", true);
             }
-        } catch (IOException e) { return Map.of("error", "Read failed"); }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
-            for (String l : lines) {
-                writer.write(l);
-                writer.newLine();
-            }
-        } catch (IOException e) { return Map.of("error", "Write failed"); }
-
-        return Map.of("success", deleted);
+            return Map.of("success", false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Map.of("error", "Delete failed");
+        }
     }
-
-
 }

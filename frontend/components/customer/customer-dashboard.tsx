@@ -7,6 +7,7 @@ import MyTripsView from "./my-trips-view";
 import HistoryView from "./history-view";
 import ReviewView from "./review-view";
 import ComplaintView from "./complaint-view";
+import Link from "next/link";
 
 function MapPinIcon() {
   return (
