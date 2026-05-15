@@ -159,6 +159,40 @@ const handleLogout = () => {
 
 </Link>
 
+<button
+    onClick={() => {
+
+        const confirmDelete = confirm(
+            "Are you sure you want to delete account?"
+        );
+
+        if(confirmDelete){
+          const userId = localStorage.getItem("userId");
+
+           fetch('http://localhost:8080/users/delete/${userId}', {
+
+        method: "DELETE"
+
+    })
+
+    .then(() => {
+
+        alert("Account Deleted Successfully");
+
+         window.location.href = "/login";
+    });
+
+        }
+
+    }}
+
+    className="w-full bg-red-700 text-white py-3 rounded-xl mb-3"
+>
+
+    Delete Account
+
+</button>
+
          <button
   onClick={handleLogout}
   className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg"
@@ -213,6 +247,8 @@ const handleLogout = () => {
                 Save
                 
               </button>
+
+        
 
             </div>
 
