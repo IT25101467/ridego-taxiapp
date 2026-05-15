@@ -12,7 +12,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // ✅ REGISTER
+    // REGISTER
     public User registerUser(User user) {
         return userRepository.save(user);
     }
