@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { AppProvider } from "@/lib/app-context";
+import { ThemeProvider } from "next-themes";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -36,8 +37,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
+
+ <ThemeProvider attribute="class">
 
   <AppProvider>
 
@@ -45,6 +48,8 @@ export default function RootLayout({
     <Analytics />
 
   </AppProvider>
+
+</ThemeProvider>
 
 </body>
     </html>

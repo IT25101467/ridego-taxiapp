@@ -38,9 +38,16 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="
+min-h-screen
+flex
+bg-gradient-to-br
+from-[#020617]
+to-[#020617]
+text-white
+">
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-between p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#020617]  flex-col justify-between p-12">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -50,13 +57,13 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               <circle cx="20" cy="17" r="1" />
             </svg>
           </div>
-          <span className="text-xl font-bold text-primary-foreground tracking-tight">RideGo</span>
+          <span className="text-xl font-bold text-white tracking-tight">RideGo</span>
         </div>
         <div>
-          <h1 className="text-4xl font-bold text-primary-foreground leading-tight text-balance">
+          <h1 className="text-4xl font-bold text-white leading-tight">
             Your ride,<br />your way.
           </h1>
-          <p className="mt-4 text-primary-foreground/70 leading-relaxed text-lg">
+          <p className="text-gray-300">
             Fast, safe, and reliable taxi booking across the city. Get Where You Need In Minutes!!!!.
           </p>
           <div className="mt-10 grid grid-cols-3 gap-4">
@@ -66,7 +73,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               { label: "Avg. Rating", value: "4.8★" },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/10 rounded-xl p-4">
-                <p className="text-2xl font-bold text-accent">{stat.value}</p>
+                <p className="text-2xl font-bold text-yellow-400">{stat.value}</p>
                 <p className="text-sm text-primary-foreground/60 mt-1">{stat.label}</p>
               </div>
             ))}
@@ -88,11 +95,11 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                 <circle cx="20" cy="17" r="1" />
               </svg>
             </div>
-            <span className="text-lg font-bold text-foreground">RideGo</span>
+            <span className="text-lg font-bold text-white">RideGo</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
-          <p className="text-muted-foreground mt-1 leading-relaxed">Sign in to your account to continue</p>
+          <h2 className="text-2xl font-bold text-white">Welcome Back</h2>
+          <p className="text-gray-300 mt-1 leading-relaxed">Sign in to your account to continue</p>
 
           {/* Role selector */}
           <div className="mt-6 flex gap-2 p-1 bg-muted rounded-xl">

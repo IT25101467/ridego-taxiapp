@@ -138,7 +138,21 @@ function PlacesInput({ value, onChange, onPlaceSelect, placeholder, dotColor }: 
     <div className="relative">
       <div className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10">
         {dotColor === "blue" ? (
-          <div className="w-3 h-3 rounded-full border-2 border-primary bg-white" />
+          <div className="
+w-full
+pl-9
+pr-4
+py-3
+rounded-xl
+border
+border-blue-900
+bg-[#07182d]
+text-white
+placeholder:text-gray-400
+focus:outline-none
+focus:ring-2
+focus:ring-blue-700
+" />
         ) : (
           <div className="w-3 h-3 rounded-full bg-accent" />
         )}
