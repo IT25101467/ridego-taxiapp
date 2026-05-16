@@ -8,6 +8,7 @@ import CustomerDashboard from "@/components/customer/customer-dashboard";
 import DriverDashboard from "@/components/driver/driver-dashboard";
 import AdminDashboard from "@/components/admin/admin-dashboard";
 import ThemeToggle from "@/components/theme-toggle";
+import SafetyButton from "@/components/safety-button";
 
 function AppRouter() {
   const { currentUser } = useApp();
@@ -37,6 +38,9 @@ export default function Page() {
       </div>
 
       <AppRouter />
+
+ <SafetyButton />
+
     </AppProvider>
   );
 
