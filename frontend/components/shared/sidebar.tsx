@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useApp } from "@/lib/app-context";
+import { useTheme } from "@/lib/theme-context";
 import { Driver } from "@/lib/mock-data";
 
 interface NavItem {
@@ -42,6 +43,7 @@ function LogoutIcon() {
 
 export default function Sidebar({ navItems, activeView, onViewChange, onProfileClick, title, subtitle }: SidebarProps) {
   const { currentUser, logout, toggleDriverAvailability } = useApp();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isDriver = currentUser?.role === "driver";
   const driver = isDriver ? (currentUser as Driver) : null;
@@ -101,6 +103,19 @@ export default function Sidebar({ navItems, activeView, onViewChange, onProfileC
           </button>
         ))}
       </nav>
+
+      {/* Dark / light mode toggle */}
+      <div className="px-3 pb-2">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="w-full flex items-center justify-center py-2 rounded-xl text-lg hover:bg-muted transition"
+          title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          aria-label="Toggle dark or light mode"
+        >
+          {theme === "light" ? "🌙" : "☀️"}
+        </button>
+      </div>
 
       {/* User footer */}
       <div className="px-3 py-4 border-t border-border">

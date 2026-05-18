@@ -8,6 +8,7 @@ import HistoryView from "./history-view";
 import ReviewView from "./review-view";
 import ComplaintView from "./complaint-view";
 import ProfileView from "@/components/shared/profile-view";
+import SafetyButton from "@/components/shared/safety-button";
 
 function MapPinIcon() {
   return (
@@ -69,6 +70,8 @@ export default function CustomerDashboard() {
         onProfileClick={() => setActiveView("profile")}
         title="Customer"
       />
+      {/* Demo safety feature for customers during booking */}
+      <SafetyButton />
       <main className="flex-1 lg:ml-0 pt-16 lg:pt-0">
         <div className="p-6 max-w-5xl mx-auto">
           {activeView === "booking" && <BookingView onRideRequested={() => setActiveView("my-trips")} />}

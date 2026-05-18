@@ -35,7 +35,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Apply saved theme before React loads to avoid a flash of wrong colors */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("ridego-theme");if(t==="dark")document.documentElement.classList.add("dark");}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="font-sans antialiased">
         {children}
         <Analytics />

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AppProvider, useApp } from "@/lib/app-context";
+import { ThemeProvider } from "@/lib/theme-context";
 import LoginPage from "@/components/auth/login-page";
 import SignupPage from "@/components/auth/signup-page";
 import CustomerDashboard from "@/components/customer/customer-dashboard";
@@ -28,8 +29,10 @@ function AppRouter() {
 
 export default function Page() {
   return (
-    <AppProvider>
-      <AppRouter />
-    </AppProvider>
+    <ThemeProvider>
+      <AppProvider>
+        <AppRouter />
+      </AppProvider>
+    </ThemeProvider>
   );
 }
