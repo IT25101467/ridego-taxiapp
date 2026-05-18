@@ -43,6 +43,16 @@ public class UserController {
         return userService.getAllUsersPublic();
     }
 
+    @GetMapping("/{id}")
+    public Map<String, Object> getUser(@PathVariable String id) {
+        return userService.getUserById(id);
+    }
+
+    @PutMapping("/{id}")
+    public Map<String, Object> updateUser(@PathVariable String id, @RequestBody Map<String, String> data) {
+        return userService.updateUser(id, data);
+    }
+
     @PutMapping("/availability/{id}")
     public Map<String, Object> toggleAvailability(@PathVariable String id, @RequestParam boolean status) {
         Map<String, Object> result = userService.toggleAvailability(id, status);

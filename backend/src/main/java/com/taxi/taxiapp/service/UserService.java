@@ -120,6 +120,59 @@ public class UserService {
         return Map.of("success", true);
     }
 
+    public Map<String, Object> getUserById(String id) {
+        for (User user : userRepository.loadAll()) {
+            if (user.getId().equals(id)) {
+                Map<String, Object> result = new LinkedHashMap<>(toPublicMap(user));
+                result.put("success", true);
+                return result;
+            }
+        }
+        return Map.of("error", "User not found.");
+    }
+
+    public Map<String, Object> updateUser(String id, Map<String, String> data) {
+        List<User> users = userRepository.loadAll();
+        User target = null;
+        for (User u : users) {
+            if (u.getId().equals(id)) {
+                target = u;
+                break;
+            }
+        }
+        if (target == null) {
+            return Map.of("error", "User not found.");
+        }
+
+        String name = data.get("name");
+        String phone = data.get("phone");
+        String currentPassword = data.get("currentPassword");
+        String newPassword = data.get("newPassword");
+
+        if (name != null && !name.isBlank()) {
+            target.setName(name.trim());
+        }
+        if (phone != null && !phone.isBlank()) {
+            target.setPhoneNumber(phone.trim());
+        }
+        if (newPassword != null && !newPassword.isBlank()) {
+            if (currentPassword == null || !target.getPassword().equals(currentPassword)) {
+                return Map.of("error", "Current password is incorrect.");
+            }
+            target.setPassword(newPassword);
+        }
+
+        try {
+            userRepository.saveAll(users);
+        } catch (IOException e) {
+            return Map.of("error", "Failed to update database.");
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>(toPublicMap(target));
+        result.put("success", true);
+        return result;
+    }
+
     public Map<String, Object> deleteUser(String id) {
         List<User> users = userRepository.loadAll();
         List<User> kept = users.stream().filter(u -> !u.getId().equals(id)).collect(Collectors.toList());

@@ -39,6 +39,8 @@ interface AppContextValue {
   addDriver: (driver: Omit<Driver, "id">) => void;
   updateDriver: (id: string, data: Partial<Driver>) => void;
   deleteDriver: (id: string) => void;
+  updateProfile: (id: string, data: Record<string, string>) => Promise<Record<string, any>>;
+  deleteAccount: (id: string) => Promise<boolean>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -355,7 +357,45 @@ async function addReview(review: Review) {
     setDrivers((prev) => prev.map((d) => (d.id === id ? { ...d, ...data } : d)));
   }
 
+  async function updateProfile(id: string, data: Record<string, string>) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (result.error) {
+        return result;
+      }
+      setCurrentUser((prev) => (prev && prev.id === id ? { ...prev, ...result } : prev));
+      if (result.role === "customer") {
+        setCustomers((prev) => prev.map((u) => (u.id === id ? { ...u, name: result.name, phone: result.phone } : u)));
+      }
+      if (result.role === "driver") {
+        setDrivers((prev) => prev.map((d) => (d.id === id ? { ...d, name: result.name, phone: result.phone } : d)));
+      }
+      return result;
+    } catch {
+      return { error: "Could not update profile." };
+    }
+  }
 
+  async function deleteAccount(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${id}`, { method: "DELETE" });
+      const result = await response.json();
+      if (!result.success) {
+        return false;
+      }
+      setCustomers((prev) => prev.filter((u) => u.id !== id));
+      setDrivers((prev) => prev.filter((d) => d.id !== id));
+      setCurrentUser(null);
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   return (
     <AppContext.Provider
@@ -383,6 +423,8 @@ async function addReview(review: Review) {
         addDriver,
         updateDriver,
         deleteDriver,
+        updateProfile,
+        deleteAccount,
       }}
     >
       {children}
