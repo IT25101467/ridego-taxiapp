@@ -16,4 +16,14 @@ public class Car extends Vehicle {
     public double calculateFare(double distanceInKm) {
         return BASE_FARE + (distanceInKm * RATE_PER_KM);
     }
+
+    @Override
+    public double getBaseFare() {
+        return BASE_FARE;
+    }
+
+    @Override
+    public double getRatePerKm() {
+        return RATE_PER_KM;
+    }
 }

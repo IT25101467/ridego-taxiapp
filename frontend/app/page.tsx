@@ -7,7 +7,6 @@ import SignupPage from "@/components/auth/signup-page";
 import CustomerDashboard from "@/components/customer/customer-dashboard";
 import DriverDashboard from "@/components/driver/driver-dashboard";
 import AdminDashboard from "@/components/admin/admin-dashboard";
-import ThemeToggle from "@/components/theme-toggle";
 
 function AppRouter() {
   const { currentUser } = useApp();
@@ -30,17 +29,7 @@ function AppRouter() {
 export default function Page() {
   return (
     <AppProvider>
-
-
-       <div className="p-4 absolute top-0 left-0 z-50">
-        <ThemeToggle />
-      </div>
-
       <AppRouter />
     </AppProvider>
   );
-
-
-
-
 }

@@ -2,12 +2,8 @@ A-001|Admin User|admin@ridego.com|admin123|admin|0771111111|true
 c1|Sarah Johnson|sarah@example.com|password|customer|0712222222|true
 c2|Mike Smith|mike@example.com|pass123|customer|0713333333|true
 d1|Nimal Perera|nimal@example.com|password|driver|0724444444|true
-d2|Driver Two|driver2@example.com|pass123|driver|0725555555|true
 c91145|Isath Nenuka|isath@email.com|isath123|customer|+94714079117|true
-c73854|aa|aa@email.com|1234|customer|+974748757777|true
 c8044|Isath Nenuka|isath@gmail.com|isath|customer|+9477777777777|true
 c99881|Bimalsha Erandi |bimalshaerandihansani@gmail.com|2004/05/08|customer|0763788313|true
-c92748|Kasun|kasun@gmail.com|1234|customer|0771234567|true
-c72868|Nuwan ekanayaka|nuwan@gmail.com|nuwan123|customer|0701234567|true
-c678|amal|amal@gmail.com|1234|customer| 0777777777|true
-c48450|test5|testnew@gmail.com|12345|customer|null|true
+d97015|Saman Perera|saman@gmail.com|password|driver|+94112223344|true
+c93530|Isath Nenuka|gvisath@gmail.com|password|customer|0711111111|true

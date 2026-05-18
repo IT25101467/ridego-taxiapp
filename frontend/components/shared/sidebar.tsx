@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useApp } from "@/lib/app-context";
 import { Driver } from "@/lib/mock-data";
-import Link from "next/link";
 
 interface NavItem {
   id: string;
@@ -46,42 +45,20 @@ export default function Sidebar({ navItems, activeView, onViewChange, title, sub
   const isDriver = currentUser?.role === "driver";
   const driver = isDriver ? (currentUser as Driver) : null;
 
- const SidebarContent = () => (
-  <div className="flex flex-col h-full">
-
-  <Link href="/profile">
-
-  <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted transition group cursor-pointer">
-
-    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-      <span className="text-sm font-semibold text-primary">
-        {currentUser?.name?.charAt(0) ?? "U"}
-      </span>
-    </div>
-
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium text-foreground truncate">
-        {currentUser?.name}
-      </p>
-
-      <p className="text-xs text-muted-foreground truncate">
-        {currentUser?.email}
-      </p>
-    </div>
-
-    <button
-      onClick={logout}
-      className="text-muted-foreground hover:text-destructive transition"
-      title="Logout"
-    >
-      <LogoutIcon />
-    </button>
-
-  </div>
-
-</Link>
-
-
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="px-6 py-5 border-b border-border">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+            <CarIcon />
+          </div>
+          <div>
+            <span className="text-base font-bold text-foreground">RideGo</span>
+            <p className="text-xs text-muted-foreground capitalize">{currentUser?.role} Portal</p>
+          </div>
+        </div>
+      </div>
 
       {/* Driver availability toggle */}
       {isDriver && driver && (
@@ -107,33 +84,20 @@ export default function Sidebar({ navItems, activeView, onViewChange, title, sub
       {/* Nav items */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => (
-          <Link
-  href={item.id === "history" ? "/history" : "#"}
-  key={item.id}
->
-
-  <button
-    onClick={() => {
-      onViewChange(item.id);
-      setMobileOpen(false);
-    }}
-    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-      activeView === item.id
-        ? "bg-sidebar-accent text-primary"
-        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-    }`}
-  >
-
-    <span className={activeView === item.id ? "text-primary" : "text-muted-foreground"}>
-      {item.icon}
-    </span>
-
-    {item.label}
-
-  </button>
-
-</Link>
-          
+          <button
+            key={item.id}
+            onClick={() => { onViewChange(item.id); setMobileOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              activeView === item.id
+                ? "bg-sidebar-accent text-primary"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <span className={activeView === item.id ? "text-primary" : "text-muted-foreground"}>
+              {item.icon}
+            </span>
+            {item.label}
+          </button>
         ))}
       </nav>
 

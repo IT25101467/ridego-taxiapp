@@ -30,4 +30,7 @@ public abstract class Vehicle {
      * Every specific car type must define its own way to calculate the fare.
      */
     public abstract double calculateFare(double distanceInKm);
+    
+    public abstract double getBaseFare();
+    public abstract double getRatePerKm();
 }
