@@ -40,9 +40,12 @@ public class ReviewController {
         // We use a Map to easily catch the JSON without needing to build a whole new Java Class
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-            // Build the pipe-separated line: ID|CustomerID|Rating|Comment|Date
+            // id|customerId|customerName|driverId|driverName|rating|comment|date
             String line = payload.get("id") + "|" +
                     payload.get("customerId") + "|" +
+                    payload.getOrDefault("customerName", "") + "|" +
+                    payload.getOrDefault("driverId", "") + "|" +
+                    payload.getOrDefault("driverName", "") + "|" +
                     payload.get("rating") + "|" +
                     payload.get("comment") + "|" +
                     payload.get("date");
@@ -79,11 +82,24 @@ public class ReviewController {
                 if (line.trim().isEmpty()) continue; // Skip blank lines
 
                 String[] parts = line.split("\\|");
-                // Make sure the line has all 5 parts (id, customerId, rating, comment, date)
-                if (parts.length >= 5) {
-                    java.util.Map<String, Object> review = new java.util.HashMap<>();
+                java.util.Map<String, Object> review = new java.util.HashMap<>();
+                if (parts.length >= 8) {
                     review.put("id", parts[0]);
                     review.put("customerId", parts[1]);
+                    review.put("customerName", parts[2]);
+                    review.put("driverId", parts[3]);
+                    review.put("driverName", parts[4]);
+                    review.put("rating", Integer.parseInt(parts[5]));
+                    review.put("comment", parts[6]);
+                    review.put("date", parts[7]);
+                    reviews.add(review);
+                } else if (parts.length >= 5) {
+                    // Legacy: id|customerId|rating|comment|date
+                    review.put("id", parts[0]);
+                    review.put("customerId", parts[1]);
+                    review.put("customerName", "");
+                    review.put("driverId", "");
+                    review.put("driverName", "");
                     review.put("rating", Integer.parseInt(parts[2]));
                     review.put("comment", parts[3]);
                     review.put("date", parts[4]);
