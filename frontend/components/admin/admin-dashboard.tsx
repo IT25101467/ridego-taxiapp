@@ -6,6 +6,7 @@ import AllBookingsView from "./all-bookings-view";
 import UserManagementView from "./user-management-view";
 import AdminComplaintsView from "./admin-complaints-view";
 import AdminReviewsView from "./admin-reviews-view";
+import ProfileView from "@/components/shared/profile-view";
 
 function BookIcon() {
   return (
@@ -58,6 +59,7 @@ export default function AdminDashboard() {
         navItems={navItems}
         activeView={activeView}
         onViewChange={setActiveView}
+        onProfileClick={() => setActiveView("profile")}
         title="Admin"
       />
       <main className="flex-1 lg:ml-0 pt-16 lg:pt-0">
@@ -66,6 +68,7 @@ export default function AdminDashboard() {
           {activeView === "users" && <UserManagementView />}
           {activeView === "reviews" && <AdminReviewsView />}
           {activeView === "complaints" && <AdminComplaintsView />}
+          {activeView === "profile" && <ProfileView />}
         </div>
       </main>
     </div>

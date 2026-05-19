@@ -7,6 +7,7 @@ import MyTripsView from "./my-trips-view";
 import HistoryView from "./history-view";
 import ReviewView from "./review-view";
 import ComplaintView from "./complaint-view";
+import ProfileView from "@/components/shared/profile-view";
 
 function MapPinIcon() {
   return (
@@ -65,6 +66,7 @@ export default function CustomerDashboard() {
         navItems={navItems}
         activeView={activeView}
         onViewChange={setActiveView}
+        onProfileClick={() => setActiveView("profile")}
         title="Customer"
       />
       <main className="flex-1 lg:ml-0 pt-16 lg:pt-0">
@@ -74,6 +76,7 @@ export default function CustomerDashboard() {
           {activeView === "history" && <HistoryView />}
           {activeView === "review" && <ReviewView />}
           {activeView === "complaints" && <ComplaintView />}
+          {activeView === "profile" && <ProfileView />}
         </div>
       </main>
     </div>

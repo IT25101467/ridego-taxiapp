@@ -14,6 +14,7 @@ interface SidebarProps {
   navItems: NavItem[];
   activeView: string;
   onViewChange: (view: string) => void;
+  onProfileClick?: () => void;
   title: string;
   subtitle?: string;
 }
@@ -39,7 +40,7 @@ function LogoutIcon() {
   );
 }
 
-export default function Sidebar({ navItems, activeView, onViewChange, title, subtitle }: SidebarProps) {
+export default function Sidebar({ navItems, activeView, onViewChange, onProfileClick, title, subtitle }: SidebarProps) {
   const { currentUser, logout, toggleDriverAvailability } = useApp();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isDriver = currentUser?.role === "driver";
@@ -103,19 +104,28 @@ export default function Sidebar({ navItems, activeView, onViewChange, title, sub
 
       {/* User footer */}
       <div className="px-3 py-4 border-t border-border">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted transition group">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-semibold text-primary">
-              {currentUser?.name?.charAt(0) ?? "U"}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">{currentUser?.name}</p>
-            <p className="text-xs text-muted-foreground truncate">{currentUser?.email}</p>
-          </div>
+        <div className="flex items-center gap-1">
           <button
+            type="button"
+            onClick={() => { onProfileClick?.(); setMobileOpen(false); }}
+            className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-xl transition group text-left min-w-0 ${
+              activeView === "profile" ? "bg-sidebar-accent" : "hover:bg-muted"
+            }`}
+          >
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-semibold text-primary">
+                {currentUser?.name?.charAt(0) ?? "U"}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">{currentUser?.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{currentUser?.email}</p>
+            </div>
+          </button>
+          <button
+            type="button"
             onClick={logout}
-            className="text-muted-foreground hover:text-destructive transition"
+            className="p-2 text-muted-foreground hover:text-destructive transition flex-shrink-0"
             title="Logout"
           >
             <LogoutIcon />

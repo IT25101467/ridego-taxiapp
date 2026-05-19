@@ -4,6 +4,7 @@ import { useState } from "react";
 import Sidebar from "@/components/shared/sidebar";
 import ActiveJobsView from "./active-jobs-view";
 import DriverHistoryView from "./driver-history-view";
+import ProfileView from "@/components/shared/profile-view";
 
 function BriefcaseIcon() {
   return (
@@ -36,12 +37,14 @@ export default function DriverDashboard() {
         navItems={navItems}
         activeView={activeView}
         onViewChange={setActiveView}
+        onProfileClick={() => setActiveView("profile")}
         title="Driver"
       />
       <main className="flex-1 lg:ml-0 pt-16 lg:pt-0">
         <div className="p-6 max-w-4xl mx-auto">
           {activeView === "active-jobs" && <ActiveJobsView />}
           {activeView === "history" && <DriverHistoryView />}
+          {activeView === "profile" && <ProfileView />}
         </div>
       </main>
     </div>
