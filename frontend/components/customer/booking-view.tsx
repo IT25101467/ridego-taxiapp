@@ -13,69 +13,57 @@ import { Trip, VehicleType } from "@/lib/mock-data";
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
 
-const RATES: Record<VehicleType, number> = {
-  Car: 60,
-  Tuk: 35,
-  Van: 80,
-  Bike: 25,
-};
-
 const KM_PRESETS = [3, 5, 10, 15, 20, 30, 50];
 
 const VEHICLE_TYPES: {
   type: VehicleType;
   description: string;
-  price: string;
   icon: React.ReactNode;
 }[] = [
-  {
-    type: "Car",
-    description: "Comfortable sedan",
-    price: "Rs. 60/km",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3" />
-        <rect x="9" y="11" width="14" height="10" rx="2" />
-        <circle cx="12" cy="17" r="1" /><circle cx="20" cy="17" r="1" />
-      </svg>
-    ),
-  },
-  {
-    type: "Tuk",
-    description: "Quick & affordable",
-    price: "Rs. 35/km",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="8" width="12" height="10" rx="2" />
-        <path d="M14 12h4l3 4H14" />
-        <circle cx="6" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" />
-      </svg>
-    ),
-  },
-  {
-    type: "Van",
-    description: "Group travel",
-    price: "Rs. 80/km",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="1" y="6" width="22" height="12" rx="2" />
-        <path d="M1 12h22" />
-        <circle cx="5" cy="19" r="1.5" /><circle cx="19" cy="19" r="1.5" />
-      </svg>
-    ),
-  },
-  {
-    type: "Bike",
-    description: "Beat the traffic",
-    price: "Rs. 25/km",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="5.5" cy="17.5" r="3.5" /><circle cx="18.5" cy="17.5" r="3.5" />
-        <path d="M15 6h1l2 5.5" /><path d="M9 6l3 5.5H5.5" /><path d="M12 6l2.5 5.5" />
-      </svg>
-    ),
-  },
-];
+    {
+      type: "Car",
+      description: "Comfortable sedan",
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3" />
+          <rect x="9" y="11" width="14" height="10" rx="2" />
+          <circle cx="12" cy="17" r="1" /><circle cx="20" cy="17" r="1" />
+        </svg>
+      ),
+    },
+    {
+      type: "Tuk",
+      description: "Quick & affordable",
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="8" width="12" height="10" rx="2" />
+          <path d="M14 12h4l3 4H14" />
+          <circle cx="6" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" />
+        </svg>
+      ),
+    },
+    {
+      type: "Van",
+      description: "Group travel",
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="1" y="6" width="22" height="12" rx="2" />
+          <path d="M1 12h22" />
+          <circle cx="5" cy="19" r="1.5" /><circle cx="19" cy="19" r="1.5" />
+        </svg>
+      ),
+    },
+    {
+      type: "Bike",
+      description: "Beat the traffic",
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="5.5" cy="17.5" r="3.5" /><circle cx="18.5" cy="17.5" r="3.5" />
+          <path d="M15 6h1l2 5.5" /><path d="M9 6l3 5.5H5.5" /><path d="M12 6l2.5 5.5" />
+        </svg>
+      ),
+    },
+  ];
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 interface PlacesInputProps {
@@ -253,21 +241,18 @@ function PinMarker({
     <AdvancedMarker position={position}>
       <div className="flex flex-col items-center">
         <div
-          className={`text-xs font-semibold px-2 py-0.5 rounded-full text-white shadow-md mb-1 whitespace-nowrap ${
-            color === "primary" ? "bg-primary" : "bg-amber-500"
-          }`}
+          className={`text-xs font-semibold px-2 py-0.5 rounded-full text-white shadow-md mb-1 whitespace-nowrap ${color === "primary" ? "bg-primary" : "bg-amber-500"
+            }`}
         >
           {label}
         </div>
         <div
-          className={`w-4 h-4 rounded-full border-2 border-white shadow-md ${
-            color === "primary" ? "bg-primary" : "bg-amber-500"
-          }`}
+          className={`w-4 h-4 rounded-full border-2 border-white shadow-md ${color === "primary" ? "bg-primary" : "bg-amber-500"
+            }`}
         />
         <div
-          className={`w-0.5 h-3 ${
-            color === "primary" ? "bg-primary" : "bg-amber-500"
-          }`}
+          className={`w-0.5 h-3 ${color === "primary" ? "bg-primary" : "bg-amber-500"
+            }`}
         />
       </div>
     </AdvancedMarker>
@@ -290,9 +275,46 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
   const [kilometers, setKilometers] = useState(5);
   const [customKm, setCustomKm] = useState("5");
   const [loading, setLoading] = useState(false);
+  const [estimatedFare, setEstimatedFare] = useState<number>(0);
+  const [ratePerKm, setRatePerKm] = useState<number>(0);
+  const [baseFare, setBaseFare] = useState<number>(0);
+  const [ratesMap, setRatesMap] = useState<Record<string, { baseFare: number, ratePerKm: number }>>({});
 
   const effectiveKm = Math.max(1, parseInt(customKm) || 1);
-  const estimatedFare = effectiveKm * RATES[selectedVehicle];
+
+  useEffect(() => {
+    async function fetchRates() {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const res = await fetch(`${apiUrl}/api/fares/rates`);
+        if (res.ok) {
+          const data = await res.json();
+          setRatesMap(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch rates", error);
+      }
+    }
+    fetchRates();
+  }, []);
+
+  useEffect(() => {
+    async function fetchFare() {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const res = await fetch(`${apiUrl}/api/fares/calculate?distance=${effectiveKm}&vehicleType=${selectedVehicle}`);
+        if (res.ok) {
+          const data = await res.json();
+          setEstimatedFare(data.fare);
+          setRatePerKm(data.ratePerKm);
+          setBaseFare(data.baseFare);
+        }
+      } catch (error) {
+        console.error("Failed to fetch fare estimate", error);
+      }
+    }
+    fetchFare();
+  }, [effectiveKm, selectedVehicle]);
 
   const handlePickupSelect = useCallback((place: google.maps.places.PlaceResult) => {
     const loc = place.geometry!.location!;
@@ -323,7 +345,7 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
       status: "PENDING",
       fare: estimatedFare,
       date: new Date().toISOString(),
-      distance: effectiveKm 
+      distance: effectiveKm
     };
     addTrip(newTrip);
     setLoading(true);
@@ -424,11 +446,10 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
                   key={km}
                   type="button"
                   onClick={() => { setKilometers(km); setCustomKm(String(km)); }}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
-                    effectiveKm === km
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                  }`}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${effectiveKm === km
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                    }`}
                 >
                   {km} km
                 </button>
@@ -444,11 +465,10 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
               <button
                 key={v.type}
                 onClick={() => setSelectedVehicle(v.type)}
-                className={`p-3 rounded-xl border text-left transition-all ${
-                  selectedVehicle === v.type
-                    ? "border-primary bg-sidebar-accent"
-                    : "border-border hover:border-primary/40 hover:bg-muted"
-                }`}
+                className={`p-3 rounded-xl border text-left transition-all ${selectedVehicle === v.type
+                  ? "border-primary bg-sidebar-accent"
+                  : "border-border hover:border-primary/40 hover:bg-muted"
+                  }`}
               >
                 <span className={selectedVehicle === v.type ? "text-primary" : "text-muted-foreground"}>
                   {v.icon}
@@ -458,7 +478,9 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
                 </p>
                 <p className="text-xs text-muted-foreground">{v.description}</p>
                 <p className="text-xs font-medium text-accent-foreground mt-0.5 bg-accent/20 inline-block px-1.5 py-0.5 rounded-md">
-                  {v.price}
+                  {ratesMap[v.type]
+                    ? `Rs. ${ratesMap[v.type].ratePerKm}/km`
+                    : "Loading..."}
                 </p>
               </button>
             ))}
@@ -472,8 +494,12 @@ function BookingInner({ onRideRequested }: BookingInnerProps) {
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-muted-foreground">
+              <span>Base Fare</span>
+              <span>Rs. {baseFare}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
               <span>Rate ({selectedVehicle})</span>
-              <span>Rs. {RATES[selectedVehicle]}/km</span>
+              <span>Rs. {ratePerKm}/km</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Distance</span>

@@ -1,4 +1,6 @@
-# Master Gitignore
+target/
+node_modules/
+.next/
 
 # Frontend Junk
 frontend/node_modules/

@@ -20,7 +20,11 @@ public class Driver extends User {
     public boolean isAvailable() { return isAvailable; }
     public void setAvailable(boolean available) { isAvailable = available; }
 
-    // POLYMORPHISM
+    @Override
+    public String getRoleKey() {
+        return "driver";
+    }
+
     @Override
     public String getDashboardMenu() {
         return "Driver Menu: 1. View Assigned Rides | 2. Toggle Availability Status";

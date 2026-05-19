@@ -34,10 +34,8 @@ public abstract class User {
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    // POLYMORPHISM/ABSTRACTION
+    /** Persisted / API role: {@code customer}, {@code driver}, or {@code admin}. */
+    public abstract String getRoleKey();
 
     public abstract String getDashboardMenu();
-
-
-
 }

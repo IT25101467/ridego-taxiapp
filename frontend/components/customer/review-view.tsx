@@ -31,7 +31,9 @@ function averageRating(reviews: Review[]) {
 }
 
 export default function ReviewView() {
-  const { currentUser, reviews, trips, drivers, addReview } = useApp();
+  // Combined hooks from both branches
+  const { currentUser, reviews, trips, drivers, customers, addReview } = useApp();
+  
   const [selectedTripId, setSelectedTripId] = useState("");
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
@@ -53,6 +55,13 @@ export default function ReviewView() {
   const selectedTrip = reviewableTrips.find((t) => t.id === selectedTripId);
 
   const myReviews = reviews.filter((r) => r.customerId === currentUser?.id);
+  const reviewCount = myReviews.length;
+
+  // Helper function to get customer name by ID (from main)
+  const getCustomerName = (customerId: string) => {
+    const customer = customers.find((c) => c.id === customerId);
+    return customer?.name || "Anonymous";
+  };
 
   const driverReviews = useMemo(() => {
     const withDriver = reviews.filter((r) => r.driverId);
@@ -91,10 +100,14 @@ export default function ReviewView() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Blended Header Section */}
       <div>
         <h1 className="text-xl font-bold text-foreground">Driver Reviews</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Rate your driver after a trip and browse reviews from other customers
+          Rate your driver after a trip and browse reviews from other customers.
+        </p>
+        <p className="text-sm text-muted-foreground mt-3">
+          You have submitted <span className="font-semibold text-foreground">{reviewCount}</span> review{reviewCount === 1 ? "" : "s"} so far.
         </p>
       </div>
 
@@ -109,7 +122,7 @@ export default function ReviewView() {
                 key={driver.id}
                 type="button"
                 onClick={() => setDriverFilter(driver.id)}
-                className={`text-left bg-card border rounded-2xl p-4 transition hover:border-primary/40 ${
+                className={`text-left bg-card border rounded-2xl p-4 transition hover:border-primary/40 shadow-sm ${
                   driverFilter === driver.id ? "border-primary ring-2 ring-primary/20" : "border-border"
                 }`}
               >
@@ -128,9 +141,12 @@ export default function ReviewView() {
       )}
 
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Review form */}
-        <div className="bg-card border border-border rounded-2xl p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-5">Rate Your Driver</h3>
+        {/* Review form (Blended styling & logic) */}
+        <div className="bg-card border border-border rounded-[28px] p-6 shadow-sm shadow-slate-200/40 h-fit">
+          <div className="flex flex-col gap-2 mb-6">
+            <h3 className="text-base font-semibold text-foreground">Rate Your Driver</h3>
+            <p className="text-sm text-muted-foreground">Add a rating and short comment to help us improve your next ride.</p>
+          </div>
 
           {submitted ? (
             <div className="py-8 text-center">
@@ -140,12 +156,14 @@ export default function ReviewView() {
                 </svg>
               </div>
               <p className="font-semibold text-foreground">Thank you for your review!</p>
-              <p className="text-sm text-muted-foreground mt-1">Other customers can now see your feedback.</p>
+              <p className="text-sm text-muted-foreground mt-1">Your feedback helps us improve every ride.</p>
             </div>
           ) : reviewableTrips.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Complete a trip with a driver before leaving a review. Check Trip History after your ride.
-            </p>
+            <div className="bg-muted rounded-2xl p-6 text-center border border-border">
+              <p className="text-sm text-muted-foreground">
+                Complete a trip with a driver before leaving a review. Check Trip History after your ride.
+              </p>
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
@@ -153,7 +171,7 @@ export default function ReviewView() {
                 <select
                   value={selectedTripId}
                   onChange={(e) => setSelectedTripId(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  className="w-full px-4 py-3 rounded-2xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                 >
                   <option value="">Choose a completed ride…</option>
                   {reviewableTrips.map((trip) => (
@@ -165,13 +183,14 @@ export default function ReviewView() {
               </div>
 
               {selectedTrip && (
-                <div className="rounded-xl bg-muted/50 px-4 py-3 text-sm">
+                <div className="rounded-xl bg-muted/50 px-4 py-3 text-sm border border-border">
                   <span className="text-muted-foreground">Driver: </span>
                   <span className="font-medium text-foreground">{selectedTrip.driverName}</span>
                 </div>
               )}
 
-              <div>
+              {/* Star rating */}
+              <div className="space-y-3">
                 <label className="block text-sm font-medium text-foreground mb-2">Rating</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -181,11 +200,11 @@ export default function ReviewView() {
                       onClick={() => setRating(star)}
                       onMouseEnter={() => setHovered(star)}
                       onMouseLeave={() => setHovered(0)}
-                      className="transition-transform hover:scale-110"
+                      className="h-12 w-12 rounded-2xl border border-border bg-card flex items-center justify-center transition hover:-translate-y-0.5 hover:border-primary hover:text-primary shadow-sm"
                     >
                       <svg
-                        width="32"
-                        height="32"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill={(hovered || rating) >= star ? "currentColor" : "none"}
                         stroke="currentColor"
@@ -200,45 +219,48 @@ export default function ReviewView() {
                   ))}
                 </div>
                 {rating > 0 && (
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    {["", "Poor", "Fair", "Good", "Very Good", "Excellent"][rating]}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{["", "Poor", "Fair", "Good", "Very Good", "Excellent"][rating]}</p>
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Your review</label>
+              {/* Comment */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">Your Review</label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="How was your driver?"
+                  placeholder="How was your driver? Tell us about your experience..."
                   rows={4}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition resize-none leading-relaxed"
+                  className="w-full min-h-[120px] px-4 py-3 rounded-2xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition resize-none leading-relaxed shadow-sm"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={rating === 0 || !selectedTripId}
-                className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit driver review
+                Submit Driver Review
               </button>
             </form>
           )}
         </div>
 
-        {/* Your reviews */}
+        {/* Personal reviews */}
         <div>
-          <h3 className="text-sm font-semibold text-foreground mb-3">Your reviews</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4">Your Past Reviews</h3>
           {myReviews.length === 0 ? (
-            <div className="bg-card border border-border rounded-2xl p-8 text-center">
+            <div className="bg-card border border-border rounded-3xl p-8 text-center shadow-sm">
               <p className="text-sm text-muted-foreground">You have not reviewed a driver yet.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {myReviews.map((review) => (
-                <ReviewCard key={review.id} review={review} showCustomer={false} />
+                <ReviewCard 
+                  key={review.id} 
+                  review={review} 
+                  showCustomer={false} 
+                />
               ))}
             </div>
           )}
@@ -246,13 +268,16 @@ export default function ReviewView() {
       </div>
 
       {/* All driver reviews — visible to customers */}
-      <div>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <h3 className="text-sm font-semibold text-foreground">All driver reviews</h3>
+      <div className="mt-6 border-t border-border pt-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Community Driver Reviews</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">See what other customers are saying.</p>
+          </div>
           <select
             value={driverFilter}
             onChange={(e) => setDriverFilter(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground"
+            className="px-4 py-2.5 rounded-xl border border-border bg-card shadow-sm text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             <option value="all">All drivers</option>
             {driversWithReviews.map((d) => (
@@ -264,13 +289,18 @@ export default function ReviewView() {
         </div>
 
         {driverReviews.length === 0 ? (
-          <div className="bg-card border border-border rounded-2xl p-8 text-center">
+          <div className="bg-card border border-border rounded-3xl p-8 text-center shadow-sm">
             <p className="text-sm text-muted-foreground">No driver reviews yet.</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {driverReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} showCustomer />
+              <ReviewCard 
+                key={review.id} 
+                review={review} 
+                showCustomer={true} 
+                customerName={getCustomerName(review.customerId)}
+              />
             ))}
           </div>
         )}
@@ -279,28 +309,33 @@ export default function ReviewView() {
   );
 }
 
+// Extracted and enhanced component
 function ReviewCard({
   review,
   showCustomer,
+  customerName,
 }: {
   review: Review;
   showCustomer: boolean;
+  customerName?: string;
 }) {
   return (
-    <div className="bg-card border border-border rounded-2xl p-4">
-      <div className="flex items-start justify-between gap-2 mb-2">
+    <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-2 mb-3">
         <div>
-          {review.driverName && (
-            <p className="text-sm font-semibold text-foreground">{review.driverName}</p>
+          {review.driverName ? (
+            <p className="text-sm font-bold text-foreground">{review.driverName}</p>
+          ) : (
+            <p className="text-sm font-semibold text-foreground">General Review</p>
           )}
-          {showCustomer && review.customerName && (
-            <p className="text-xs text-muted-foreground mt-0.5">by {review.customerName}</p>
+          {showCustomer && customerName && (
+            <p className="text-xs text-muted-foreground mt-1">by {customerName}</p>
           )}
         </div>
-        <span className="text-xs text-muted-foreground shrink-0">{review.date}</span>
+        <span className="text-xs text-muted-foreground shrink-0 bg-muted px-2 py-1 rounded-md">{review.date}</span>
       </div>
       <StarDisplay rating={review.rating} />
-      <p className="text-sm text-foreground leading-relaxed mt-2">
+      <p className="text-sm text-foreground leading-relaxed mt-3 bg-background/50 rounded-xl">
         {review.comment || "No comment provided."}
       </p>
     </div>

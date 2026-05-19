@@ -30,6 +30,8 @@ interface AppContextValue {
   assignDriver: (tripId: string, driverId: string) => void;
   toggleDriverAvailability: (driverId: string) => void;
   addReview: (review: Review) => void;
+  updateReview: (id: string, data: Partial<Review>) => Promise<void>;
+  deleteReview: (id: string) => Promise<void>;
   rateTripDriver: (tripId: string, rating: number) => void;
   addCustomer: (user: Omit<User, "id">) => void;
   updateCustomer: (id: string, data: Partial<User>) => void;
@@ -304,6 +306,30 @@ async function addReview(review: Review) {
     }
   }
 
+  async function updateReview(id: string, data: Partial<Review>) {
+    setReviews((prev) => prev.map((review) => (review.id === id ? { ...review, ...data } : review)));
+    try {
+      await fetch(`${API_BASE_URL}/reviews/update/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error("Failed to update review in Java", error);
+    }
+  }
+
+  async function deleteReview(id: string) {
+    setReviews((prev) => prev.filter((review) => review.id !== id));
+    try {
+      await fetch(`${API_BASE_URL}/reviews/delete/${id}`, {
+        method: "DELETE",
+      });
+    } catch (error) {
+      console.error("Failed to delete review in Java", error);
+    }
+  }
+
 // --- REAL STAR RATING SUBMISSION ---
   async function rateTripDriver(tripId: string, rating: number) {
     // 1. Instantly update the UI so the stars turn yellow
@@ -368,6 +394,8 @@ async function addReview(review: Review) {
         assignDriver,
         toggleDriverAvailability,
         addReview,
+        updateReview,
+        deleteReview,
         rateTripDriver,
         addCustomer,
         updateCustomer,

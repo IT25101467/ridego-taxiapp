@@ -1,52 +1,121 @@
 package com.taxi.taxiapp.repository;
 
 import com.taxi.taxiapp.model.*;
+import org.springframework.stereotype.Repository;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Persistence for {@link User} and subclasses. File format (pipe-separated):
+ * <ul>
+ *   <li>Passenger (customer): {@code id|name|email|password|customer|phone|true}</li>
+ *   <li>Driver: {@code id|name|email|password|driver|phone|available|license}</li>
+ *   <li>Admin: {@code id|name|email|password|admin|phone|true|adminRole}</li>
+ * </ul>
+ * Legacy 7-field driver lines (no license column) are still loaded; license defaults to {@code N/A}.
+ */
+@Repository
 public class UserRepository {
-    // The filename for storage, similar to the sample project's 'users.txt' [cite: 7, 123]
-    private final String FILE_PATH = "users.txt";
 
-    /**
-     * FILE WRITING: This saves a user to the text file.
-     * Hits the 'Create' requirement for CRUD[cite: 99, 107].
-     */
-    public void saveUser(User user) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-            String userData = user.getId() + "|" + user.getName() + "|" + user.getEmail() + "|" +
-                    user.getPassword() + "|" + user.getPhoneNumber();
+    private final String filePath;
 
-            // If it's a driver, we add their specific license and status
-            if (user instanceof Driver) {
-                Driver d = (Driver) user;
-                userData += "|" + d.getLicenseNumber() + "|" + d.isAvailable();
+    public UserRepository() {
+        this("users.txt");
+    }
+
+    public UserRepository(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public List<User> loadAll() {
+        List<User> users = new ArrayList<>();
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return users;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                String[] parts = line.split("\\|", -1);
+                User user = parseLine(parts);
+                if (user != null) {
+                    users.add(user);
+                }
             }
-
-            writer.write(userData);
-            writer.newLine();
         } catch (IOException e) {
-            System.err.println("Error writing to file: " + e.getMessage());
+            System.err.println("Error reading users file: " + e.getMessage());
+        }
+        return users;
+    }
+
+    public void append(User user) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+            writer.write(formatLine(user));
+            writer.newLine();
         }
     }
 
-    /**
-     * FILE READING: This loads all users from the file.
-     * Hits the 'Read' requirement for CRUD[cite: 99, 107].
-     */
-    public List<User> getAllUsers() {
-        List<User> users = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split("\\|");
-                // Logic to recreate Passenger or Driver objects goes here...
-                // (We'll refine the parsing logic as we build the Service layer)
+    /** Rewrites the entire file from the in-memory list (used after update/delete). */
+    public void saveAll(List<User> users) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
+            for (User u : users) {
+                writer.write(formatLine(u));
+                writer.newLine();
             }
-        } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
         }
-        return users;
+    }
+
+    User parseLine(String[] p) {
+        if (p.length < 7) {
+            return null;
+        }
+        String id = p[0];
+        String name = p[1];
+        String email = p[2];
+        String password = p[3];
+        String role = p[4].trim().toLowerCase();
+        String phone = p[5];
+        boolean available = Boolean.parseBoolean(p[6]);
+
+        switch (role) {
+            case "driver": {
+                String license = (p.length > 7 && !p[7].isBlank()) ? p[7] : "N/A";
+                return new Driver(id, name, email, password, phone, license, available);
+            }
+            case "admin": {
+                String adminRole = (p.length > 7 && !p[7].isBlank()) ? p[7] : "Dispatcher";
+                return new Admin(id, name, email, password, phone, adminRole);
+            }
+            case "customer":
+                return new Passenger(id, name, email, password, phone);
+            default:
+                return null;
+        }
+    }
+
+    String formatLine(User user) {
+        String base = String.join("|",
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getRoleKey(),
+                user.getPhoneNumber());
+
+        if (user instanceof Driver) {
+            Driver d = (Driver) user;
+            return base + "|" + d.isAvailable() + "|" + d.getLicenseNumber();
+        }
+        if (user instanceof Admin) {
+            Admin a = (Admin) user;
+            return base + "|" + true + "|" + a.getAdminRole();
+        }
+        return base + "|" + true;
     }
 }

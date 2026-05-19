@@ -11,7 +11,11 @@ public class Passenger extends User {
         super(id, name, email, password, phoneNumber);
     }
 
-    // POLYMORPHISM
+    @Override
+    public String getRoleKey() {
+        return "customer";
+    }
+
     @Override
     public String getDashboardMenu() {
         return "Passenger Menu: 1. Request a Ride | 2. View Ride Status";

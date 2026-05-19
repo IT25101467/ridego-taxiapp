@@ -1,4 +1,4 @@
-"Use client";
+"use client";
 
 import { useState } from "react";
 import { useApp } from "@/lib/app-context";

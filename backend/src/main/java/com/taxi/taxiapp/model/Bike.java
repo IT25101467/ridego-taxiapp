@@ -1,16 +1,13 @@
 package com.taxi.taxiapp.model;
 
-public class Tuk extends Vehicle {
+public class Bike extends Vehicle {
+    private static final double RATE_PER_KM = 60.0;
+    private static final double BASE_FARE = 50.0;
 
-    // Tuks are cheaper and usually don't have a massive base drop fee!
-    private static final double RATE_PER_KM = 90.0;
-    private static final double BASE_FARE = 100.0;
-
-    public Tuk(String vehicleId, String model, String licensePlate) {
+    public Bike(String vehicleId, String model, String licensePlate) {
         super(vehicleId, model, licensePlate);
     }
 
-    // POLYMORPHISM: The math here is completely different than the Car!
     @Override
     public double calculateFare(double distanceInKm) {
         return BASE_FARE + (distanceInKm * RATE_PER_KM);

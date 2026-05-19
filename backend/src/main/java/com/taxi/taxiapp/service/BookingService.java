@@ -1,10 +1,8 @@
 package com.taxi.taxiapp.service;
 
-import com.taxi.taxiapp.model.Driver;
 import com.taxi.taxiapp.model.RideBooking;
 import com.taxi.taxiapp.model.Vehicle;
 import com.taxi.taxiapp.repository.RideRepository;
-import com.taxi.taxiapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +12,6 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     private final RideRepository rideRepository = new RideRepository();
-    private final UserRepository userRepository = new UserRepository();
 
     /**
      * LOGIC: Admin views only pending rides.
