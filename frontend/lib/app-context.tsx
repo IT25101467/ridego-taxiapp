@@ -7,10 +7,11 @@ import {
   Driver,
   Trip,
   Review,
+  DriverReview,
+  DriverReviewSummary,
   TripStatus,
   mockUsers,
   mockDrivers,
-  mockAdmin,
   mockTrips,
   mockReviews,
 } from "./mock-data";
@@ -21,6 +22,8 @@ interface AppContextValue {
   drivers: Driver[];
   customers: User[];
   reviews: Review[];
+  driverReviews: DriverReview[];
+  driverReviewSummaries: DriverReviewSummary[];
   tripRatings: Record<string, number>;
   login: (email: string, password: string, role: string) => Promise<boolean>;  
   register: (userData: any) => Promise<boolean>;
@@ -32,7 +35,7 @@ interface AppContextValue {
   addReview: (review: Review) => void;
   updateReview: (id: string, data: Partial<Review>) => Promise<void>;
   deleteReview: (id: string) => Promise<void>;
-  rateTripDriver: (tripId: string, rating: number) => void;
+  rateTripDriver: (tripId: string, rating: number) => Promise<{ success: boolean; error?: string }>;
   addCustomer: (user: Omit<User, "id">) => void;
   updateCustomer: (id: string, data: Partial<User>) => void;
   deleteCustomer: (id: string) => void;
@@ -51,64 +54,86 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [drivers, setDrivers] = useState<Driver[]>(mockDrivers);
   const [customers, setCustomers] = useState<User[]>(mockUsers);
   const [reviews, setReviews] = useState<Review[]>(mockReviews);
+  const [driverReviews, setDriverReviews] = useState<DriverReview[]>([]);
+  const [driverReviewSummaries, setDriverReviewSummaries] = useState<DriverReviewSummary[]>([]);
   const [tripRatings, setTripRatings] = useState<Record<string, number>>({});
 
-useEffect(() => {
+  async function loadDriverReviewSummaries() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/driver-reviews/summary`);
+      if (res.ok) {
+        setDriverReviewSummaries(await res.json());
+      }
+    } catch (error) {
+      console.error("Failed to load driver review summaries", error);
+    }
+  }
+
+  useEffect(() => {
     async function loadRealData() {
       try {
-        // --- 1. FETCH TRIPS ---
-        console.log("Fetching real bookings from Java...");
-        const tripRes = await fetch(`${API_BASE_URL}/bookings/all`);
-        if (tripRes.ok) {
-          const javaData = await tripRes.json();
-          const realTrips: Trip[] = javaData.map((jTrip: any) => ({
-            id: jTrip.bookingId,
-            customerId: jTrip.passengerId,
-            customerName: jTrip.passengerId, 
-            driverId: jTrip.driverId,
-            driverName: jTrip.driverId ? "Driver " + jTrip.driverId : null,
-            pickup: jTrip.pickupLocation,
-            dropoff: jTrip.dropoffLocation,
-            vehicleType: "Car", 
-            status: jTrip.status,
-            fare: jTrip.calculatedFare || 0,
-            distance: jTrip.distanceInKm || 0,
-            date: new Date().toISOString()
-          }));
-          setTrips(realTrips); 
-        }
+        let nameById = (id: string) => id;
 
-        // --- 2. FETCH REVIEWS (NEW!) ---
-        console.log("Fetching real reviews from Java...");
-        const reviewRes = await fetch(`${API_BASE_URL}/reviews/all`);
-        if (reviewRes.ok) {
-          const javaReviews = await reviewRes.json();
-          setReviews(javaReviews);
-
-          // This maps the stars so React remembers what you clicked!
-          const loadedRatings: Record<string, number> = {};
-          javaReviews.forEach((rev: any) => {
-            // Your ReviewController saves the trip ID in the "id" field
-            loadedRatings[rev.id] = rev.rating; 
-          });
-          setTripRatings(loadedRatings);
-        }
-
-// --- 3. FETCH ALL USERS (NEW!) ---
         console.log("Fetching real users from Java...");
         const userRes = await fetch(`${API_BASE_URL}/users/all`);
         if (userRes.ok) {
           const allUsers = await userRes.json();
-          
-          // Filter the big list into our specific states
-          const realCustomers = allUsers.filter((u: any) => u.role.toLowerCase() === "customer");
-          const realDrivers = allUsers.filter((u: any) => u.role.toLowerCase() === "driver");
-
+          const realCustomers = allUsers.filter((u: { role: string }) => u.role.toLowerCase() === "customer");
+          const realDrivers = allUsers.filter((u: { role: string }) => u.role.toLowerCase() === "driver");
           setCustomers(realCustomers);
           setDrivers(realDrivers);
-          console.log(`Loaded ${realCustomers.length} customers and ${realDrivers.length} drivers.`);
+          nameById = (id: string) => allUsers.find((u: { id: string }) => u.id === id)?.name ?? id;
         }
 
+        console.log("Fetching real bookings from Java...");
+        const tripRes = await fetch(`${API_BASE_URL}/bookings/all`);
+        if (tripRes.ok) {
+          const javaData = await tripRes.json();
+          const realTrips: Trip[] = javaData.map((jTrip: {
+            bookingId: string;
+            passengerId: string;
+            driverId: string | null;
+            pickupLocation: string;
+            dropoffLocation: string;
+            status: TripStatus;
+            calculatedFare?: number;
+            distanceInKm?: number;
+          }) => ({
+            id: jTrip.bookingId,
+            customerId: jTrip.passengerId,
+            customerName: nameById(jTrip.passengerId),
+            driverId: jTrip.driverId,
+            driverName: jTrip.driverId ? nameById(jTrip.driverId) : null,
+            pickup: jTrip.pickupLocation,
+            dropoff: jTrip.dropoffLocation,
+            vehicleType: "Car",
+            status: jTrip.status,
+            fare: jTrip.calculatedFare || 0,
+            distance: jTrip.distanceInKm || 0,
+            date: new Date().toISOString(),
+          }));
+          setTrips(realTrips);
+        }
+
+        console.log("Fetching app reviews from Java...");
+        const reviewRes = await fetch(`${API_BASE_URL}/reviews/all`);
+        if (reviewRes.ok) {
+          setReviews(await reviewRes.json());
+        }
+
+        console.log("Fetching driver reviews from Java...");
+        const driverReviewRes = await fetch(`${API_BASE_URL}/driver-reviews/all`);
+        if (driverReviewRes.ok) {
+          const loaded: DriverReview[] = await driverReviewRes.json();
+          setDriverReviews(loaded);
+          const loadedRatings: Record<string, number> = {};
+          loaded.forEach((rev) => {
+            loadedRatings[rev.bookingId] = rev.rating;
+          });
+          setTripRatings(loadedRatings);
+        }
+
+        await loadDriverReviewSummaries();
       } catch (error) {
         console.error("Critical: Could not load data from Java server.", error);
       }
@@ -312,19 +337,36 @@ async function addReview(review: Review) {
     }
   }
 
-// --- REAL STAR RATING SUBMISSION ---
-  async function rateTripDriver(tripId: string, rating: number) {
-    // 1. Instantly update the UI so the stars turn yellow
-    setTripRatings((prev) => ({ ...prev, [tripId]: rating }));
-    
-    // 2. Send the rating to the new Java endpoint
+  async function rateTripDriver(tripId: string, rating: number): Promise<{ success: boolean; error?: string }> {
+    if (!currentUser) {
+      return { success: false, error: "You must be signed in to rate a driver." };
+    }
+
     try {
-      console.log(`Sending ${rating} star rating for trip ${tripId} to Java...`);
-      await fetch(`${API_BASE_URL}/reviews/add?tripId=${tripId}&rating=${rating}`, {
+      const response = await fetch(`${API_BASE_URL}/driver-reviews`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId: tripId,
+          customerId: currentUser.id,
+          rating,
+        }),
       });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        return { success: false, error: data.error ?? "Failed to save rating." };
+      }
+
+      setTripRatings((prev) => ({ ...prev, [tripId]: rating }));
+      if (data.review) {
+        setDriverReviews((prev) => [data.review as DriverReview, ...prev]);
+      }
+      await loadDriverReviewSummaries();
+      return { success: true };
     } catch (error) {
-      console.error("Failed to save rating to Java", error);
+      console.error("Failed to save driver rating", error);
+      return { success: false, error: "Could not connect to the server." };
     }
   }
 
@@ -405,6 +447,8 @@ async function addReview(review: Review) {
         drivers,
         customers,
         reviews,
+        driverReviews,
+        driverReviewSummaries,
         tripRatings,
         login,
         register,

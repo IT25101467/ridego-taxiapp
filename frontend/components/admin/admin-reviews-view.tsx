@@ -54,8 +54,8 @@ export default function AdminReviewsView() {
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Customer Reviews</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage and view all customer reviews</p>
+        <h1 className="text-2xl font-bold text-foreground">App Reviews</h1>
+        <p className="text-sm text-muted-foreground mt-1">General feedback about RideGo (not driver trip ratings)</p>
       </div>
 
       {/* Stats */}

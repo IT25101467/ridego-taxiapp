@@ -2,54 +2,72 @@
 
 import { useState } from "react";
 import { useApp } from "@/lib/app-context";
+import { Trip } from "@/lib/mock-data";
 import { formatCurrency, formatDate, STATUS_COLORS, STATUS_LABELS } from "@/lib/mock-data";
 
-function StarRating({ tripId }: { tripId: string }) {
+function StarRating({ trip }: { trip: Trip }) {
   const { tripRatings, rateTripDriver } = useApp();
-  const saved = tripRatings[tripId] ?? 0;
+  const saved = tripRatings[trip.id] ?? 0;
   const [hovered, setHovered] = useState(0);
-  const [toast, setToast] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleRate(star: number) {
-    if (saved) return; // already rated
-    rateTripDriver(tripId, star);
-    setToast(true);
-    setTimeout(() => setToast(false), 2500);
+  const hasDriver = Boolean(trip.driverId);
+
+  async function handleRate(star: number) {
+    if (saved > 0 || submitting || !hasDriver) return;
+    setSubmitting(true);
+    const result = await rateTripDriver(trip.id, star);
+    setSubmitting(false);
+    if (result.success) {
+      setToast("Rating submitted!");
+      setTimeout(() => setToast(null), 2500);
+    } else {
+      setToast(result.error ?? "Could not save rating");
+      setTimeout(() => setToast(null), 3000);
+    }
   }
 
   const display = saved > 0 ? saved : hovered;
 
+  if (!hasDriver) {
+    return <span className="text-xs text-muted-foreground">No driver</span>;
+  }
+
   return (
-    <div className="relative flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          disabled={saved > 0}
-          onClick={() => handleRate(star)}
-          onMouseEnter={() => !saved && setHovered(star)}
-          onMouseLeave={() => !saved && setHovered(0)}
-          className={`transition-transform ${!saved ? "hover:scale-110" : ""} ${saved ? "cursor-default" : "cursor-pointer"}`}
-          aria-label={`Rate ${star} stars`}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill={display >= star ? "currentColor" : "none"}
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={display >= star ? "text-accent" : "text-muted-foreground/40"}
+    <div className="relative flex flex-col gap-1">
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            disabled={saved > 0 || submitting}
+            onClick={() => handleRate(star)}
+            onMouseEnter={() => !saved && setHovered(star)}
+            onMouseLeave={() => !saved && setHovered(0)}
+            className={`transition-transform ${!saved && !submitting ? "hover:scale-110" : ""} ${saved || submitting ? "cursor-default" : "cursor-pointer"}`}
+            aria-label={`Rate ${star} stars`}
           >
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-        </button>
-      ))}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill={display >= star ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={display >= star ? "text-accent" : "text-muted-foreground/40"}
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </button>
+        ))}
+      </div>
+      {saved > 0 && <span className="text-xs text-muted-foreground">Rated</span>}
       {toast && (
-        <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-foreground text-background text-xs font-medium px-2.5 py-1 rounded-lg shadow pointer-events-none">
-          Rating submitted!
+        <span className="absolute -top-7 left-0 whitespace-nowrap bg-foreground text-background text-xs font-medium px-2.5 py-1 rounded-lg shadow pointer-events-none z-10">
+          {toast}
         </span>
       )}
     </div>
@@ -69,10 +87,9 @@ export default function HistoryView() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-bold text-foreground">Trip History</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">All your past rides</p>
+        <p className="text-sm text-muted-foreground mt-0.5">All your past rides — rate your driver after each trip</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {[
           { label: "Total Rides", value: completedTrips.length.toString() },
@@ -91,7 +108,6 @@ export default function HistoryView() {
         ))}
       </div>
 
-      {/* Table */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
         {completedTrips.length === 0 ? (
           <div className="py-12 text-center">
@@ -129,7 +145,7 @@ export default function HistoryView() {
                     </td>
                     <td className="px-5 py-4 text-right font-semibold text-foreground">{formatCurrency(trip.fare)}</td>
                     <td className="px-5 py-4">
-                      <StarRating tripId={trip.id} />
+                      <StarRating trip={trip} />
                     </td>
                   </tr>
                 ))}

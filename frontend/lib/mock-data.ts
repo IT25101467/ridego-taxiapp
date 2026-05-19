@@ -43,6 +43,26 @@ export interface Review {
   date: string;
 }
 
+export interface DriverReview {
+  id: string;
+  bookingId: string;
+  customerId: string;
+  customerName: string;
+  driverId: string;
+  driverName: string;
+  pickup: string;
+  dropoff: string;
+  rating: number;
+  date: string;
+}
+
+export interface DriverReviewSummary {
+  driverId: string;
+  driverName: string;
+  avgRating: number;
+  reviewCount: number;
+}
+
 // ─── Mock Users ───────────────────────────────────────────────────────────────
 
 export const mockUsers: User[] = [

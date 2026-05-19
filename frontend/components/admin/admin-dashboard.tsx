@@ -6,6 +6,7 @@ import AllBookingsView from "./all-bookings-view";
 import UserManagementView from "./user-management-view";
 import AdminComplaintsView from "./admin-complaints-view";
 import AdminReviewsView from "./admin-reviews-view";
+import AdminDriverReviewsView from "./admin-driver-reviews-view";
 import ProfileView from "@/components/shared/profile-view";
 
 function BookIcon() {
@@ -43,10 +44,22 @@ function StarIcon() {
   );
 }
 
+function DriverStarIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3" />
+      <rect x="9" y="11" width="14" height="10" rx="2" />
+      <circle cx="12" cy="17" r="1" />
+      <circle cx="20" cy="17" r="1" />
+    </svg>
+  );
+}
+
 const navItems = [
   { id: "bookings", label: "All Bookings", icon: <BookIcon /> },
   { id: "users", label: "User Management", icon: <UsersIcon /> },
-  { id: "reviews", label: "Reviews", icon: <StarIcon /> },
+  { id: "driver-reviews", label: "Driver Reviews", icon: <DriverStarIcon /> },
+  { id: "reviews", label: "App Reviews", icon: <StarIcon /> },
   { id: "complaints", label: "Complaints", icon: <MessageSquareIcon /> },
 ];
 
@@ -66,6 +79,7 @@ export default function AdminDashboard() {
         <div className="p-6 max-w-6xl mx-auto">
           {activeView === "bookings" && <AllBookingsView />}
           {activeView === "users" && <UserManagementView />}
+          {activeView === "driver-reviews" && <AdminDriverReviewsView />}
           {activeView === "reviews" && <AdminReviewsView />}
           {activeView === "complaints" && <AdminComplaintsView />}
           {activeView === "profile" && <ProfileView />}
