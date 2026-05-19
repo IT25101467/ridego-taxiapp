@@ -12,26 +12,6 @@ public class ReviewController {
 
     private final String FILE_PATH = "reviews.txt";
 
-    @PostMapping("/add")
-    public String addReview(@RequestParam String tripId, @RequestParam int rating) {
-
-        // --- THE CHEAT CODE ---
-        java.io.File file = new java.io.File(FILE_PATH);
-        System.out.println("🕵️‍♂️ DEBUG: Saving review exactly here -> " + file.getAbsolutePath());
-        // ----------------------
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-            writer.write(tripId + "|" + rating);
-            writer.newLine();
-            return "Review saved successfully!";
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Failed to save review.";
-        }
-    }
-
-
-
     /**
      * Catches the full review form (with comments) from the React UI
      */
