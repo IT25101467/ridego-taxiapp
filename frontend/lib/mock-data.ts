@@ -38,6 +38,9 @@ export interface Trip {
 export interface Review {
   id: string;
   customerId: string;
+  customerName: string;
+  driverId: string;
+  driverName: string;
   rating: number;
   comment: string;
   date: string;
@@ -205,10 +208,33 @@ export const mockTrips: Trip[] = [
 export const mockReviews: Review[] = [
   {
     id: "r1",
-    customerId: "c1",
+    customerId: "c2",
+    customerName: "James Perera",
+    driverId: "d3",
+    driverName: "Ruwan Jayawardena",
     rating: 5,
-    comment: "Excellent service! The driver was very professional.",
+    comment: "Excellent service! Very professional and on time.",
     date: "2025-01-09",
+  },
+  {
+    id: "r2",
+    customerId: "c3",
+    customerName: "Amelia Fernando",
+    driverId: "d1",
+    driverName: "Nimal Bandara",
+    rating: 4,
+    comment: "Smooth ride, friendly driver.",
+    date: "2025-01-08",
+  },
+  {
+    id: "r3",
+    customerId: "c1",
+    customerName: "Sarah Johnson",
+    driverId: "d1",
+    driverName: "Nimal Bandara",
+    rating: 5,
+    comment: "Best driver I've had on RideGo!",
+    date: "2025-01-07",
   },
 ];
 

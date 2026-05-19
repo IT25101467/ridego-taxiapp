@@ -79,7 +79,18 @@ useEffect(() => {
         const reviewRes = await fetch(`${API_BASE_URL}/reviews/all`);
         if (reviewRes.ok) {
           const javaReviews = await reviewRes.json();
-          setReviews(javaReviews);
+          setReviews(
+            javaReviews.map((r: Review) => ({
+              id: r.id,
+              customerId: r.customerId,
+              customerName: r.customerName || "Customer",
+              driverId: r.driverId || "",
+              driverName: r.driverName || "",
+              rating: Number(r.rating),
+              comment: r.comment || "",
+              date: r.date,
+            }))
+          );
 
           // This maps the stars so React remembers what you clicked!
           const loadedRatings: Record<string, number> = {};
@@ -277,7 +288,16 @@ async function addReview(review: Review) {
       await fetch(`${API_BASE_URL}/reviews/add-full`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(review)
+        body: JSON.stringify({
+          id: review.id,
+          customerId: review.customerId,
+          customerName: review.customerName,
+          driverId: review.driverId,
+          driverName: review.driverName,
+          rating: String(review.rating),
+          comment: review.comment,
+          date: review.date,
+        }),
       });
     } catch (error) {
       console.error("Failed to save review to Java", error);
